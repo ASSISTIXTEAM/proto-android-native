@@ -33,7 +33,7 @@ flowchart LR
     subgraph upload [Upload]
         F[Plain file ≥ 8 KB]
         E[AES-256-GCM encrypt]
-        S[Split into 7 shards]
+        S[Split: 7 data + XOR parity]
         F --> E --> S
     end
     subgraph mesh [Mesh]
@@ -65,8 +65,8 @@ flowchart LR
 | Параметр | Значение | Код |
 |----------|----------|-----|
 | Шифрование | AES-256-GCM, IV 12 байт | `ProtoCellsCrypto` |
-| Шардов на blob | **7** | `ProtoCellsConfig.SHARD_COUNT` |
-| Репликация | **3** копии (назначает сервер) | `ProtoCellsConfig.REPLICATION` |
+| Шардов на blob | **8** (7 data + 1 XOR parity, **Cells-P**) · legacy 7 mirror |
+| Репликация | Data ×3, parity ×2 (назначает сервер) |
 | Мин. размер медиа | **8 KB** | `ProtoCellsConfig.MIN_BLOB_BYTES` |
 | Квота волонтёра | **768 MB** по умолчанию | `ProtoCellsConfig.DEFAULT_QUOTA_BYTES` |
 | Сжатие шардов | gzip, magic `PCGZ` | `ProtoCellsCompression` |
@@ -173,8 +173,8 @@ ProtoCellsScreen.kt          # explainer UI
 
 ## PROTO Cells (English summary)
 
-PROTO Cells is **mandatory mutual encrypted media hosting**. Files ≥ 8 KB are AES-256-GCM encrypted, split into **7 shards** with **3× replication**, gzip-compressed on disk, and distributed across chat members and volunteers. The server keeps a **catalog** (metadata + key) and provides **short shard relay** — not full file storage. Android auto-enrolls signed-in users, publishes on send, assembles on download, and runs background sync every 2 minutes.
+PROTO Cells is **mandatory mutual encrypted media hosting**. Files ≥ 8 KB are AES-256-GCM encrypted, split into **8 shards** (7 data + XOR parity, **Cells-P**), gzip-compressed on disk, and distributed across chat members and volunteers. Legacy 7-shard mirror blobs remain supported.
 
 ---
 
-*PROTO Android **1.1.5** · [proto.su](https://proto.su)*
+*PROTO Android **1.1.6** · [proto.su](https://proto.su)*

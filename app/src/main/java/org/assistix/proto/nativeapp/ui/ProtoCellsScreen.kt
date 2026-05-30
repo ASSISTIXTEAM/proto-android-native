@@ -1,6 +1,5 @@
 package org.assistix.proto.nativeapp.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,20 +22,22 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.assistix.proto.nativeapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +46,9 @@ fun ProtoCellsScreen(
     showBack: Boolean = true,
     compact: Boolean = false,
 ) {
+    val app = LocalContext.current.applicationContext as org.assistix.proto.nativeapp.ProtoApplication
+    val stats by app.cellsManager.stats.collectAsState()
+    val repair by app.cellsManager.repairActive.collectAsState()
     Scaffold(
         topBar = {
             if (showBack) {
@@ -84,9 +88,7 @@ fun ProtoCellsScreen(
                     Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.proto_cells_icon),
-                        contentDescription = null,
+                    ProtoCellsArt(
                         modifier = Modifier.size(if (compact) 96.dp else 132.dp),
                     )
                     Spacer(Modifier.height(12.dp))
@@ -101,6 +103,27 @@ fun ProtoCellsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 6.dp),
                     )
+                    if (!compact) {
+                        Spacer(Modifier.height(14.dp))
+                        ProtoCellsTierBadge(stats.tier)
+                    }
+                }
+            }
+            if (!compact) {
+                Spacer(Modifier.height(16.dp))
+                Surface(shape = RoundedCornerShape(16.dp), tonalElevation = 2.dp, modifier = Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(UiStrings.cellsStatsTitle, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        Text(UiStrings.cellsStorageFmt(stats.usedBytes.coerceAtLeast(stats.localBytes), stats.quotaBytes))
+                        Text(UiStrings.cellsHelpedFmt(stats.conversationsHelped))
+                        if (stats.holdsPending > 0) {
+                            Text(UiStrings.cellsPendingHoldsFmt(stats.holdsPending), color = ProtoOrange)
+                        }
+                        if (repair > 0) {
+                            Text(UiStrings.cellsRepairBadge, color = ProtoOrange, fontWeight = FontWeight.SemiBold)
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = ProtoOrange)
+                        }
+                    }
                 }
             }
             Spacer(Modifier.height(20.dp))

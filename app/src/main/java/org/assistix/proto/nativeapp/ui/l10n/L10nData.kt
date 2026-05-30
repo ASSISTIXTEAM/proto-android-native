@@ -811,6 +811,13 @@ object L10nData {
                 "Smarter mesh for small groups — more copies, fewer gaps",
                 "Media from 8 KB joins the hive automatically",
             )
+            whatsNew116Title = "What's new in PROTO 1.1.6"
+            whatsNew116Bullets = listOf(
+                "Settings and local data live in protected app storage — no launch crashes on Android 11+",
+                "Automatic recovery if the database or preference files are corrupted",
+                "Safer background sync and repair for PROTO Cells",
+                "Stability fixes across settings, onboarding, and chat",
+            )
             cellsScreenTitle = "PROTO Cells"
             cellsScreenTagline = "Mutual encrypted hosting for media"
             cellsSettingsHint = "How it works · safety · why it's required"
@@ -822,7 +829,7 @@ object L10nData {
                 "Each file is AES-256 encrypted before it leaves your phone. Holders only store random shards — nobody can open your media without the key in the chat catalog."
             cellsHowTitle = "Smart & compact"
             cellsHowBody =
-                "Files split into 7 shards with triple redundancy. Shards are gzip-compressed to save space. In small chats every member helps — even 10 people can protect 100+ files."
+                "Files split into 7 data stripes + 1 XOR parity shard (Cells-P). One missing data shard recovers automatically. Shards are gzip-compressed — less storage than triple mirror."
             cellsBulletsTitle = "Why it's awesome"
             cellsBullets = listOf(
                 "No one reads your files — only encrypted fragments",
@@ -830,6 +837,46 @@ object L10nData {
                 "Automatic repair when someone comes back online",
                 "Fair rule: your media is hosted, so you host too",
             )
+            cellsStatsTitle = "Your node"
+            cellsTierMember = "Member"
+            cellsTierActive = "Active node"
+            cellsTierNode = "Hive node"
+            cellsStorageFmt = "%s / %s stored"
+            cellsHelpedFmt = "Helped %d chats"
+            cellsRepairBadge = "Network repairing media"
+            cellsRepairNotifyTitle = "PROTO Cells"
+            cellsRepairNotifyBody = "The network is repairing encrypted media shards"
+            cellsPendingHoldsFmt = "%d shards syncing"
+            healthScreenTitle = "Health check"
+            healthScreenHint = "Support diagnostics — no message content is sent."
+            healthDataStore = "Preferences (DataStore)"
+            healthRoom = "Local database (Room)"
+            healthCellsEnrolled = "PROTO Cells enrolled"
+            healthCellsShards = "Shards"
+            healthCellsStorage = "Network storage"
+            healthCellsChats = "Chats helped"
+            healthCellsSync = "Last Cells sync"
+            healthWhisper = "On-device voice (Whisper)"
+            healthBuild = "App build"
+            healthCrashLog = "Local crash log"
+            healthCrashLogFmt = "%d lines buffered"
+            healthNever = "Not yet"
+            healthLastSyncFmt = "%s"
+            crashReportToggle = "Send anonymous crash reports"
+            crashReportHint = "Stack traces only — no chats or media"
+            transferProgressMulti = "%d transfers in progress"
+            offlineCellsPendingFmt = "Media syncing via Cells"
+            offlineSendWhenOnline = "Messages send when you're back online"
+            whatsNewCurrentTitle = "What's new in PROTO 1.1.6"
+            whatsNewCurrentBullets = listOf(
+                "Cells-P RAID: 7 data stripes + XOR parity — faster, less storage, 1 missing shard auto-recovery",
+                "Cells stats & node tier — see your contribution in Settings",
+                "Repair badge + notification when the network fixes media",
+                "Global transfer progress bar for uploads, downloads & Cells",
+                "Offline banner: queued messages & Cells sync status",
+                "Health check screen, optional crash reports, smarter Whisper on weak phones",
+            )
+            settingsHealthCheck = "Health check"
             whatsNewTitle = "What's new in PROTO 1.0.48"
             whatsNewOk = "Got it"
             whatsNew148Bullets = listOf(
@@ -1789,6 +1836,13 @@ object L10nData {
                 "Умная сеть для малых групп — больше копий, меньше потерь",
                 "Медиа от 8 КБ автоматически попадает в сеть Cells",
             )
+            whatsNew116Title = "Новое в PROTO 1.1.6"
+            whatsNew116Bullets = listOf(
+                "Настройки и данные — в защищённом хранилище, без вылетов на Android 11+",
+                "Автовосстановление при повреждении базы или файлов настроек",
+                "Безопасная фоновая синхронизация и починка PROTO Cells",
+                "Стабильность в настройках, онбординге и чатах",
+            )
             cellsScreenTitle = "PROTO Cells"
             cellsScreenTagline = "Взаимное зашифрованное хранение медиа"
             cellsSettingsHint = "Как работает · безопасность · почему обязательно"
@@ -1800,7 +1854,7 @@ object L10nData {
                 "Каждый файл шифруется AES-256 до отправки с телефона. У держателей только фрагменты — открыть медиа без ключа из каталога чата невозможно."
             cellsHowTitle = "Умно и компактно"
             cellsHowBody =
-                "Файл делится на 7 шардов с тройной репликацией. Шарды сжимаются gzip — экономия места. В маленьких чатах помогает каждый — 10 человек могут защитить 100+ файлов."
+                "Файл делится на 7 data-полос + 1 XOR parity (Cells-P). Один пропавший data-шард восстанавливается автоматически. Gzip-сжатие — меньше места, чем тройное зеркало."
             cellsBulletsTitle = "Почему это круто"
             cellsBullets = listOf(
                 "Никто не читает файлы — только зашифрованные фрагменты",
@@ -1808,6 +1862,46 @@ object L10nData {
                 "Автопочинка, когда кто-то снова онлайн",
                 "Честное правило: твоё медиа хостят — значит, и ты хостишь",
             )
+            cellsStatsTitle = "Твой узел"
+            cellsTierMember = "Участник"
+            cellsTierActive = "Активный узел"
+            cellsTierNode = "Узел сети"
+            cellsStorageFmt = "%s / %s в сети"
+            cellsHelpedFmt = "Помог %d чатам"
+            cellsRepairBadge = "Сеть чинит медиа"
+            cellsRepairNotifyTitle = "PROTO Cells"
+            cellsRepairNotifyBody = "Сеть восстанавливает зашифрованные шарды медиа"
+            cellsPendingHoldsFmt = "%d шардов синхронизируется"
+            healthScreenTitle = "Проверка здоровья"
+            healthScreenHint = "Диагностика для поддержки — без текста сообщений."
+            healthDataStore = "Настройки (DataStore)"
+            healthRoom = "Локальная база (Room)"
+            healthCellsEnrolled = "PROTO Cells подключён"
+            healthCellsShards = "Шарды"
+            healthCellsStorage = "Хранилище в сети"
+            healthCellsChats = "Помог чатам"
+            healthCellsSync = "Последняя синхронизация Cells"
+            healthWhisper = "Голос на устройстве (Whisper)"
+            healthBuild = "Сборка приложения"
+            healthCrashLog = "Локальный лог крашей"
+            healthCrashLogFmt = "%d строк в буфере"
+            healthNever = "Ещё не было"
+            healthLastSyncFmt = "%s"
+            crashReportToggle = "Отправлять анонимные отчёты о сбоях"
+            crashReportHint = "Только stack trace — без чатов и медиа"
+            transferProgressMulti = "%d передач в процессе"
+            offlineCellsPendingFmt = "Медиа синхронизируется через Cells"
+            offlineSendWhenOnline = "Сообщения отправятся при появлении сети"
+            whatsNewCurrentTitle = "Новое в PROTO 1.1.6"
+            whatsNewCurrentBullets = listOf(
+                "Cells-P RAID: 7 data + XOR parity — быстрее, меньше места, автовосстановление 1 шарда",
+                "Статистика Cells и tier узла — вклад виден в настройках",
+                "Бейдж и уведомление, когда сеть чинит медиа",
+                "Общий прогресс загрузок, скачиваний и Cells",
+                "Офлайн-баннер: очередь сообщений и статус Cells",
+                "Health check, опциональные crash-отчёты, умный Whisper на слабых телефонах",
+            )
+            settingsHealthCheck = "Проверка здоровья"
             whatsNewTitle = "Новое в PROTO 1.0.48"
             whatsNewOk = "Понятно"
             whatsNew148Bullets = listOf(

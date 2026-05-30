@@ -12,6 +12,7 @@ internal object ProtoWhisperLocal {
     private var loadedPath: String? = null
 
     fun ensureModel(modelFile: File, minBytes: Long = 19_000_000L): Boolean {
+        if (!WhisperNativeSupport.isDeviceSupported) return false
         if (!BuildConfig.ENABLE_WHISPER_NATIVE) return false
         val path = modelFile.absolutePath
         synchronized(lock) {

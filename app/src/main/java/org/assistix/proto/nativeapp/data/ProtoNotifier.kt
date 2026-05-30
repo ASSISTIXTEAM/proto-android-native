@@ -226,6 +226,24 @@ class ProtoNotifier(private val context: Context) {
         }
     }
 
+    fun notifyCellsRepair(activeRepairs: Int) {
+        if (activeRepairs <= 0) return
+        runCatching {
+            val intent = Intent(context, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP }
+            val pi = PendingIntent.getActivity(context, CELLS_REPAIR_ID, intent, pendingFlags())
+            val n =
+                NotificationCompat.Builder(context, CHAN_MSG)
+                    .setSmallIcon(R.drawable.proto_logo)
+                    .setContentTitle(UiStrings.cellsRepairNotifyTitle)
+                    .setContentText(UiStrings.cellsRepairNotifyBody)
+                    .setContentIntent(pi)
+                    .setAutoCancel(true)
+                    .setOnlyAlertOnce(true)
+                    .build()
+            nm.notify(CELLS_REPAIR_ID, n)
+        }
+    }
+
     private fun pendingFlags(): Int =
         PendingIntent.FLAG_UPDATE_CURRENT or
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
@@ -237,5 +255,6 @@ class ProtoNotifier(private val context: Context) {
         private const val MSG_BASE = 4000
         private const val CALL_ID = 9001
         private const val STT_READY_ID = 9010
+        private const val CELLS_REPAIR_ID = 9011
     }
 }

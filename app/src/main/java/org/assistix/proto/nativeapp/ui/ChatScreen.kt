@@ -124,6 +124,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.assistix.proto.nativeapp.data.ProtoTransferProgressHub
 import org.assistix.proto.nativeapp.data.MsgItem
 import org.assistix.proto.nativeapp.data.hasMediaAttachment
 import org.assistix.proto.nativeapp.data.shouldShowMediaCaption
@@ -184,6 +185,8 @@ fun ChatScreen(
     val app = ctx.applicationContext as ProtoApplication
     val online by app.network.isOnline.collectAsState(initial = app.network.checkOnline())
     var queuedOutbox by remember { mutableIntStateOf(0) }
+    val cellsStats by app.cellsManager.stats.collectAsState()
+    val cellsRepair by app.cellsManager.repairActive.collectAsState()
     LaunchedEffect(online) {
         while (isActive) {
             queuedOutbox = withContext(Dispatchers.IO) { messages.pendingOutboxCount() }
@@ -297,6 +300,7 @@ fun ChatScreen(
     suspend fun sendConfirmedMedia(confirmed: PendingOutgoingMedia, caption: String) {
         val t = token ?: return
         uploading = true
+        ProtoTransferProgressHub.begin("chat-upload", "Upload")
         try {
             when (confirmed) {
                 is PendingOutgoingMedia.Single -> {
@@ -373,6 +377,7 @@ fun ChatScreen(
             haptic(HapticKind.Error)
             Toast.makeText(ctx, e.message ?: UiStrings.genericError, Toast.LENGTH_SHORT).show()
         } finally {
+            ProtoTransferProgressHub.end("chat-upload")
             uploading = false
         }
     }
@@ -1860,7 +1865,13 @@ fun ChatScreen(
     ) { pad ->
         Box(Modifier.padding(pad).fillMaxSize()) {
             Column(Modifier.fillMaxSize().imePadding()) {
-            ProtoOfflineBanner(offline = !online, queuedCount = queuedOutbox)
+            ProtoGlobalProgressBar()
+            ProtoOfflineBanner(
+                offline = !online,
+                queuedCount = queuedOutbox,
+                cellsPending = cellsStats.holdsPending,
+                cellsRepairing = cellsRepair,
+            )
             pinnedInfo?.let { pin ->
                 ProtoSurfaceCard(
                     onClick = { jumpToReplyMessage(pin.messageId) },

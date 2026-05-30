@@ -2,6 +2,7 @@ package org.assistix.proto.nativeapp
 
 import android.app.Application
 import android.util.Log
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,6 +24,7 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import org.assistix.proto.nativeapp.data.AssistixChatRepository
 import org.assistix.proto.nativeapp.data.ProtoCachePrefetcher
+import org.assistix.proto.nativeapp.data.ProtoCrashReporter
 import org.assistix.proto.nativeapp.data.ProtoCacheManager
 import org.assistix.proto.nativeapp.data.ProtoMediaResolver
 import org.assistix.proto.nativeapp.data.ProtoChatBackup
@@ -71,76 +73,145 @@ class ProtoApplication : Application() {
     lateinit var sttQueue: ProtoSttQueue
     lateinit var appUpdate: ProtoAppUpdateManager
 
-    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val scopeHandler =
+        CoroutineExceptionHandler { _, e ->
+            Log.e(TAG, "applicationScope error", e)
+        }
+
+    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + scopeHandler)
 
     override fun onCreate() {
         super.onCreate()
-        runCatching {
-            ProtoPersistentStorage.initAndMigrate(this)
-            org.assistix.proto.nativeapp.data.ProtoLinkPreviewCache.attach(this)
-            ProtoApiOrigin.init(this)
-            ProtoApiOrigin.clearPreferredIfBroken(this)
-            session = ProtoSessionStore(this)
-            pendingVerification = ProtoPendingVerificationStore(this)
-            api = ProtoApi(this)
-            prefs = ProtoAppPreferences(this)
-            chatLocalPrefs = ProtoChatLocalPrefs(this)
-            draftPrefs = ProtoDraftPrefs(this)
-            offlineVault = org.assistix.proto.nativeapp.data.ProtoOfflineVault(this)
-            profileCache = org.assistix.proto.nativeapp.data.ProtoProfileCache(offlineVault, api)
-            themeStore = ProtoThemeStore(this)
-            notifier = ProtoNotifier(this)
-            network = ProtoNetworkMonitor(this)
-            network.attach(applicationScope)
-            connectivity = org.assistix.proto.nativeapp.data.ProtoConnectivityAdvisor(this, network, api)
-            applicationScope.launch {
-                runCatching { draftPrefs.ensureRecovered() }
-                runCatching { connectivity.refresh() }
-            }
-            applicationScope.launch {
-                network.onlineFlow.collect { online ->
-                    if (online) runCatching { connectivity.refresh() }
+        try {
+            initApplication()
+        } catch (e: Exception) {
+            Log.e(TAG, "initApplication failed — minimal fallback", e)
+            ensureMinimalServices()
+        }
+    }
+
+    private fun initApplication() {
+        runCatching { ProtoPersistentStorage.initAndMigrate(this) }
+            .onFailure { e -> Log.w(TAG, "storage init", e) }
+        org.assistix.proto.nativeapp.data.ProtoLinkPreviewCache.attach(this)
+        ProtoApiOrigin.init(this)
+        ProtoApiOrigin.clearPreferredIfBroken(this)
+
+        session = ProtoSessionStore(this)
+        pendingVerification = ProtoPendingVerificationStore(this)
+        api = ProtoApi(this)
+        prefs = ProtoAppPreferences(this)
+        ProtoCrashReporter.install(this, applicationScope, prefs)
+        chatLocalPrefs = ProtoChatLocalPrefs(this)
+        draftPrefs = ProtoDraftPrefs(this)
+        offlineVault = org.assistix.proto.nativeapp.data.ProtoOfflineVault(this)
+        themeStore = ProtoThemeStore(this)
+        notifier = ProtoNotifier(this)
+        network = ProtoNetworkMonitor(this)
+        network.attach(applicationScope)
+
+        profileCache = org.assistix.proto.nativeapp.data.ProtoProfileCache(offlineVault, api)
+        connectivity = org.assistix.proto.nativeapp.data.ProtoConnectivityAdvisor(this, network, api)
+        cache = ProtoCacheManager(this)
+        cellsManager = org.assistix.proto.nativeapp.data.cells.ProtoCellsManager(this, api, network)
+
+        val dao =
+            runCatching { ProtoDatabase.get(this).dao() }
+                .getOrElse {
+                    Log.e(TAG, "database unavailable", it)
+                    throw it
                 }
+
+        mediaResolver = ProtoMediaResolver(this, dao, cache, api, cellsManager)
+        messages = ProtoMessageRepository(dao, api)
+        conversations = ProtoConversationRepository(dao, api)
+        assistixChat = AssistixChatRepository(dao)
+        stt = ProtoSttCoordinator(this, api, network, prefs, notifier)
+        sttQueue = ProtoSttQueue(this, applicationScope, stt, api, cache, prefs)
+        cachePrefetch = ProtoCachePrefetcher(dao, cache, api, messages, conversations, mediaResolver)
+        appUpdate = ProtoAppUpdateManager(this, api, prefs)
+        val callMgr = ProtoCallManager(applicationContext, api, notifier, prefs)
+        calls = callMgr
+        callMgr.onCallEnded = { info -> applicationScope.launch { logCall(info) } }
+
+        applicationScope.launch {
+            runCatching { draftPrefs.ensureRecovered() }
+            runCatching { connectivity.refresh() }
+        }
+        applicationScope.launch {
+            network.onlineFlow.collect { online ->
+                if (online) runCatching { connectivity.refresh() }
             }
-            cache = ProtoCacheManager(this)
+        }
+        runCatching { setupImageLoader() }.onFailure { e -> Log.w(TAG, "ImageLoader setup failed", e) }
+        WidgetRefreshScheduler.schedulePeriodic(this)
+        AppUpdateScheduler.schedule(this)
+        applicationScope.launch {
+            delay(2500)
+            runCatching { appUpdate.refresh(silent = true) }
+        }
+        applicationScope.launch {
+            delay(8000)
+            runCatching { stt.ensurePackHealthy(applicationScope) }
+        }
+        applicationScope.launch {
+            delay(20_000)
+            runCatching { stt.warmupModel() }
+        }
+        startBackgroundJobs()
+    }
+
+    /** Last-resort init so UI never crashes on lateinit. */
+    private fun ensureMinimalServices() {
+        if (!::network.isInitialized) network = ProtoNetworkMonitor(this)
+        if (!::api.isInitialized) api = ProtoApi(this)
+        if (!::session.isInitialized) session = ProtoSessionStore(this)
+        if (!::prefs.isInitialized) prefs = ProtoAppPreferences(this)
+        if (!::themeStore.isInitialized) themeStore = ProtoThemeStore(this)
+        if (!::notifier.isInitialized) notifier = ProtoNotifier(this)
+        if (!::cellsManager.isInitialized) {
+            cellsManager = org.assistix.proto.nativeapp.data.cells.ProtoCellsManager(this, api, network)
+        }
+        if (!::cache.isInitialized) cache = ProtoCacheManager(this)
+        if (!::pendingVerification.isInitialized) pendingVerification = ProtoPendingVerificationStore(this)
+        if (!::chatLocalPrefs.isInitialized) chatLocalPrefs = ProtoChatLocalPrefs(this)
+        if (!::draftPrefs.isInitialized) draftPrefs = ProtoDraftPrefs(this)
+        if (!::offlineVault.isInitialized) offlineVault = org.assistix.proto.nativeapp.data.ProtoOfflineVault(this)
+        if (!::profileCache.isInitialized) {
+            profileCache = org.assistix.proto.nativeapp.data.ProtoProfileCache(offlineVault, api)
+        }
+        if (!::connectivity.isInitialized) {
+            connectivity = org.assistix.proto.nativeapp.data.ProtoConnectivityAdvisor(this, network, api)
+        }
+        runCatching {
             val dao = ProtoDatabase.get(this).dao()
-            cellsManager =
-                org.assistix.proto.nativeapp.data.cells.ProtoCellsManager(this, api, network)
-            mediaResolver = ProtoMediaResolver(this, dao, cache, api, cellsManager)
-            messages = ProtoMessageRepository(dao, api)
-            conversations = ProtoConversationRepository(dao, api)
-            assistixChat = AssistixChatRepository(dao)
-            stt = ProtoSttCoordinator(this, api, network, prefs, notifier)
+            if (!::mediaResolver.isInitialized) {
+                mediaResolver = ProtoMediaResolver(this, dao, cache, api, cellsManager)
+            }
+            if (!::messages.isInitialized) messages = ProtoMessageRepository(dao, api)
+            if (!::conversations.isInitialized) conversations = ProtoConversationRepository(dao, api)
+            if (!::assistixChat.isInitialized) assistixChat = AssistixChatRepository(dao)
+            if (!::cachePrefetch.isInitialized) {
+                cachePrefetch = ProtoCachePrefetcher(dao, cache, api, messages, conversations, mediaResolver)
+            }
+        }.onFailure { e -> Log.e(TAG, "minimal db layer failed", e) }
+        if (!::stt.isInitialized) stt = ProtoSttCoordinator(this, api, network, prefs, notifier)
+        if (!::sttQueue.isInitialized) {
             sttQueue = ProtoSttQueue(this, applicationScope, stt, api, cache, prefs)
-            cachePrefetch = ProtoCachePrefetcher(dao, cache, api, messages, conversations, mediaResolver)
-            appUpdate = ProtoAppUpdateManager(this, api, prefs)
+        }
+        if (!::appUpdate.isInitialized) appUpdate = ProtoAppUpdateManager(this, api, prefs)
+        if (!::calls.isInitialized) {
             val callMgr = ProtoCallManager(applicationContext, api, notifier, prefs)
             calls = callMgr
             callMgr.onCallEnded = { info -> applicationScope.launch { logCall(info) } }
-            runCatching { setupImageLoader() }.onFailure { e ->
-                Log.w(TAG, "ImageLoader setup failed", e)
-            }
-            WidgetRefreshScheduler.schedulePeriodic(this)
-            AppUpdateScheduler.schedule(this)
-            applicationScope.launch {
-                delay(2500)
-                runCatching { appUpdate.refresh(silent = true) }
-            }
-            applicationScope.launch {
-                delay(8000)
-                stt.ensurePackHealthy(applicationScope)
-            }
-            applicationScope.launch {
-                delay(20_000)
-                runCatching { stt.warmupModel() }
-            }
+        }
+        if (::messages.isInitialized && ::conversations.isInitialized) {
             startBackgroundJobs()
-        }.onFailure { e ->
-            Log.e(TAG, "onCreate failed", e)
         }
     }
 
     private fun startBackgroundJobs() {
+        if (!::prefs.isInitialized || !::session.isInitialized || !::network.isInitialized) return
         applicationScope.launch {
             runCatching {
                 val initial = prefs.languageCodeFlow.first()
@@ -154,6 +225,7 @@ class ProtoApplication : Application() {
                     }
             }
         }
+        if (!::messages.isInitialized || !::conversations.isInitialized || !::cachePrefetch.isInitialized) return
         applicationScope.launch {
             network.onlineFlow.collect { online ->
                 if (online) {
@@ -229,6 +301,7 @@ class ProtoApplication : Application() {
     }
 
     private suspend fun logCall(info: CallEndInfo) {
+        if (!::messages.isInitialized) return
         val token = session.token() ?: return
         val status =
             when (info.status) {
@@ -248,7 +321,7 @@ class ProtoApplication : Application() {
                 durationSec = info.durationSec,
                 peerLabel = info.peerLabel,
             )
-        messages.insertCallLog(token, info.conversationId, meta, mine = !info.incoming)
+        runCatching { messages.insertCallLog(token, info.conversationId, meta, mine = !info.incoming) }
     }
 
     private fun setupImageLoader() {

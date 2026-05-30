@@ -36,7 +36,6 @@ object ProtoApiOrigin {
         return built.distinct()
     }
 
-    /** Clear cached origin if it pointed at a broken api.proto.su vhost. */
     fun clearPreferredIfBroken(context: Context) {
         val p = preferred ?: return
         if (p.contains("api.proto.su", ignoreCase = true)) {

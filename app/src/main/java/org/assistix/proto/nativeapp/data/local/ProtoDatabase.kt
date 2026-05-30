@@ -2,12 +2,14 @@ package org.assistix.proto.nativeapp.data.local
 
 import android.content.Context
 import android.util.Log
+import org.assistix.proto.nativeapp.data.ProtoDataStoreFactory
 import org.assistix.proto.nativeapp.data.ProtoPersistentStorage
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import java.io.File
 
 @Database(
     entities = [
@@ -50,16 +52,34 @@ abstract class ProtoDatabase : RoomDatabase() {
         }
 
         private fun openWithRecovery(context: Context): ProtoDatabase {
-            repeat(2) { attempt ->
+            repeat(3) { attempt ->
                 try {
                     return build(context)
                 } catch (e: Exception) {
                     Log.w(TAG, "open attempt ${attempt + 1} failed", e)
-                    runCatching { context.deleteDatabase(DB_NAME) }
+                    wipeDatabaseFiles(context)
                     reset()
                 }
             }
-            return build(context)
+            return build(context, useInternalFallback = true)
+        }
+
+        private fun wipeDatabaseFiles(context: Context) {
+            runCatching { context.deleteDatabase(DB_NAME) }
+            runCatching {
+                val external = ProtoPersistentStorage.databaseFile(context)
+                deleteSqliteFamily(external)
+            }
+            runCatching {
+                deleteSqliteFamily(context.getDatabasePath(DB_NAME))
+            }
+            ProtoDataStoreFactory.invalidateAll()
+        }
+
+        private fun deleteSqliteFamily(dbFile: File) {
+            if (dbFile.exists()) dbFile.delete()
+            File(dbFile.path + "-shm").takeIf { it.exists() }?.delete()
+            File(dbFile.path + "-wal").takeIf { it.exists() }?.delete()
         }
 
         private val MIGRATION_9_10 =
@@ -106,10 +126,17 @@ abstract class ProtoDatabase : RoomDatabase() {
                 }
             }
 
-        private fun build(context: Context): ProtoDatabase {
-            ProtoPersistentStorage.initAndMigrate(context)
-            val dbFile = ProtoPersistentStorage.databaseFile(context)
-            return Room.databaseBuilder(context, ProtoDatabase::class.java, dbFile.absolutePath)
+        private fun build(context: Context, useInternalFallback: Boolean = false): ProtoDatabase {
+            runCatching { ProtoPersistentStorage.initAndMigrate(context) }
+                .onFailure { e -> Log.w(TAG, "storage migrate skipped", e) }
+            val dbPath =
+                if (useInternalFallback) {
+                    context.getDatabasePath(DB_NAME).absolutePath
+                } else {
+                    ProtoPersistentStorage.databaseFile(context).absolutePath
+                }
+            File(dbPath).parentFile?.mkdirs()
+            return Room.databaseBuilder(context, ProtoDatabase::class.java, dbPath)
                 .addMigrations(MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
                 .build()
         }

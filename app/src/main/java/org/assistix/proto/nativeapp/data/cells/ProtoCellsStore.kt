@@ -64,4 +64,19 @@ class ProtoCellsStore(context: Context) {
         }
         return out
     }
+
+    data class LocalUsage(val bytes: Long, val shards: Int)
+
+    fun localUsage(): LocalUsage {
+        var bytes = 0L
+        var shards = 0
+        if (!root.exists()) return LocalUsage(0, 0)
+        root.walkTopDown().maxDepth(3).forEach { f ->
+            if (f.isFile && f.name.endsWith(".shard")) {
+                bytes += f.length()
+                shards++
+            }
+        }
+        return LocalUsage(bytes, shards)
+    }
 }

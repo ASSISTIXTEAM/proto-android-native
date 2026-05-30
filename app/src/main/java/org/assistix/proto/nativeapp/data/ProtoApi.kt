@@ -1839,6 +1839,22 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
         return j.optBoolean("ok", false)
     }
 
+    fun cellsMyStats(token: String): JSONObject? =
+        authedGet(token, "/api/cells.php?action=my_stats")
+
+    fun reportCrash(token: String, stack: String, versionCode: Int, versionName: String): Boolean {
+        val j =
+            authedPost(
+                token,
+                "/api/crash-report.php",
+                JSONObject()
+                    .put("stack", stack.take(65536))
+                    .put("version_code", versionCode)
+                    .put("version_name", versionName),
+            ) ?: return false
+        return j.optBoolean("ok", false)
+    }
+
     fun cellsMyHolds(token: String): JSONArray? =
         authedGet(token, "/api/cells.php?action=my_holds")?.optJSONArray("holds")
 

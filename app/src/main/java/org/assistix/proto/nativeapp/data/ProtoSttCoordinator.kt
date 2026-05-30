@@ -204,6 +204,7 @@ class ProtoSttCoordinator(
 
     suspend fun warmupModel() =
         withContext(Dispatchers.IO) {
+            if (!WhisperNativeSupport.isRuntimeSafe(context)) return@withContext
             if (!isPackReady()) return@withContext
             val tier = readModelTier()
             val modelFile = modelFileFor(tier)

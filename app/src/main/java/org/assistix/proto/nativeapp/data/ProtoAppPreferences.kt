@@ -34,6 +34,9 @@ class ProtoAppPreferences(private val context: Context) {
     private val whatsNew148Seen = booleanPreferencesKey("whats_new_148_seen")
     private val whatsNew112Seen = booleanPreferencesKey("whats_new_112_seen")
     private val whatsNew115Seen = booleanPreferencesKey("whats_new_115_seen")
+    private val whatsNew116Seen = booleanPreferencesKey("whats_new_116_seen")
+    private val whatsNewSeenVersionCode = stringPreferencesKey("whats_new_seen_version_code")
+    private val crashReportOptInKey = booleanPreferencesKey("crash_report_opt_in")
     private val linkPreviewsKey = booleanPreferencesKey("link_previews_in_chat")
     private val sendOnEnterKey = booleanPreferencesKey("send_on_enter")
     private val compactChatListKey = booleanPreferencesKey("compact_chat_list")
@@ -309,6 +312,30 @@ class ProtoAppPreferences(private val context: Context) {
 
     suspend fun setSeenWhatsNew115() {
         appPrefs.edit { it[whatsNew115Seen] = true }
+    }
+
+    suspend fun hasSeenWhatsNew116(): Boolean =
+        appPrefs.data.map { it[whatsNew116Seen] == true }.first()
+
+    suspend fun setSeenWhatsNew116() {
+        appPrefs.edit { it[whatsNew116Seen] = true }
+    }
+
+    /** Single what's-new gate per versionCode (BuildConfig.VERSION_CODE). */
+    suspend fun hasSeenWhatsNewForBuild(versionCode: Int): Boolean {
+        val seen = appPrefs.data.map { it[whatsNewSeenVersionCode]?.toIntOrNull() ?: 0 }.first()
+        return seen >= versionCode
+    }
+
+    suspend fun setSeenWhatsNewForBuild(versionCode: Int) {
+        appPrefs.edit { it[whatsNewSeenVersionCode] = versionCode.toString() }
+    }
+
+    val crashReportOptIn: Flow<Boolean> =
+        appPrefs.data.map { it[crashReportOptInKey] != false }
+
+    suspend fun setCrashReportOptIn(on: Boolean) {
+        appPrefs.edit { it[crashReportOptInKey] = on }
     }
 
     val sttWifiOnlyHeavyModels: Flow<Boolean> =

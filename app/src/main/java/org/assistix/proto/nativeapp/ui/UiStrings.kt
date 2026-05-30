@@ -808,6 +808,8 @@ object UiStrings {
     val whatsNew112Bullets get() = bundle.whatsNew112Bullets
     val whatsNew115Title get() = bundle.whatsNew115Title
     val whatsNew115Bullets get() = bundle.whatsNew115Bullets
+    val whatsNew116Title get() = bundle.whatsNew116Title
+    val whatsNew116Bullets get() = bundle.whatsNew116Bullets
     val whatsNew148Bullets get() = bundle.whatsNew148Bullets
     val cellsScreenTitle get() = bundle.cellsScreenTitle
     val cellsScreenTagline get() = bundle.cellsScreenTagline
@@ -820,6 +822,59 @@ object UiStrings {
     val cellsHowBody get() = bundle.cellsHowBody
     val cellsBulletsTitle get() = bundle.cellsBulletsTitle
     val cellsBullets get() = bundle.cellsBullets
+    val cellsStatsTitle get() = bundle.cellsStatsTitle
+    val cellsTierMember get() = bundle.cellsTierMember
+    val cellsTierActive get() = bundle.cellsTierActive
+    val cellsTierNode get() = bundle.cellsTierNode
+    val cellsRepairBadge get() = bundle.cellsRepairBadge
+    val cellsRepairNotifyTitle get() = bundle.cellsRepairNotifyTitle
+    val cellsRepairNotifyBody get() = bundle.cellsRepairNotifyBody
+    val healthScreenTitle get() = bundle.healthScreenTitle
+    val healthScreenHint get() = bundle.healthScreenHint
+    val healthDataStore get() = bundle.healthDataStore
+    val healthRoom get() = bundle.healthRoom
+    val healthCellsEnrolled get() = bundle.healthCellsEnrolled
+    val healthCellsShards get() = bundle.healthCellsShards
+    val healthCellsStorage get() = bundle.healthCellsStorage
+    val healthCellsChats get() = bundle.healthCellsChats
+    val healthCellsSync get() = bundle.healthCellsSync
+    val healthWhisper get() = bundle.healthWhisper
+    val healthBuild get() = bundle.healthBuild
+    val healthCrashLog get() = bundle.healthCrashLog
+    val healthNever get() = bundle.healthNever
+    val crashReportToggle get() = bundle.crashReportToggle
+    val crashReportHint get() = bundle.crashReportHint
+    val offlineCellsPendingFmt get() = bundle.offlineCellsPendingFmt
+    val offlineSendWhenOnline get() = bundle.offlineSendWhenOnline
+    val whatsNewCurrentTitle get() = bundle.whatsNewCurrentTitle
+    val whatsNewCurrentBullets get() = bundle.whatsNewCurrentBullets
+    val settingsHealthCheck get() = bundle.settingsHealthCheck
+
+    fun cellsStorageFmt(used: Long, quota: Long): String =
+        String.format(bundle.cellsStorageFmt, formatBytes(used), formatBytes(quota))
+
+    fun cellsHelpedFmt(chats: Int): String = String.format(bundle.cellsHelpedFmt, chats)
+
+    fun cellsPendingHoldsFmt(count: Int): String = String.format(bundle.cellsPendingHoldsFmt, count)
+
+    fun healthCrashLogFmt(lines: Int): String = String.format(bundle.healthCrashLogFmt, lines)
+
+    fun healthLastSyncFmt(whenMs: Long): String {
+        val fmt = java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.SHORT, java.text.DateFormat.SHORT)
+        return String.format(bundle.healthLastSyncFmt, fmt.format(java.util.Date(whenMs)))
+    }
+
+    fun transferProgressMulti(count: Int): String = String.format(bundle.transferProgressMulti, count)
+
+    private fun formatBytes(bytes: Long): String {
+        if (bytes < 1024) return "$bytes B"
+        val kb = bytes / 1024.0
+        if (kb < 1024) return "%.1f KB".format(kb)
+        val mb = kb / 1024.0
+        if (mb < 1024) return "%.1f MB".format(mb)
+        return "%.2f GB".format(mb / 1024.0)
+    }
+
     val channelNick get() = bundle.channelNick
     val channelNickHint get() = bundle.channelNickHint
     val channelDescription get() = bundle.channelDescription

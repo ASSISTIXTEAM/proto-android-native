@@ -280,22 +280,30 @@ fun ProtoNavHost(
                 "cell_blob_published", "cell_repair_request" -> {
                     val data = raw.optJSONObject("data") ?: return@ProtoRealtimeHub
                     app.applicationScope.launch(Dispatchers.IO) {
-                        val t = session.token() ?: return@launch
-                        app.cellsManager.syncMyHolds(t)
-                        if (raw.optString("type") == "cell_repair_request") {
-                            val blobId = data.optString("blob_id", "")
-                            val cid = data.optInt("conversation_id", 0)
-                            val missing = data.optJSONArray("missing_indices") ?: return@launch
-                            val row = app.messages.findLocalMedia(blobId) ?: return@launch
-                            val indices = (0 until missing.length()).mapNotNull { missing.optInt(it).takeIf { i -> i >= 0 } }
-                            app.cellsManager.repairFromLocal(
-                                t,
-                                blobId,
-                                cid,
-                                File(row.localPath),
-                                row.mime,
-                                indices,
-                            )
+                        runCatching {
+                            val t = session.token() ?: return@runCatching
+                            app.cellsManager.syncMyHolds(t)
+                            if (raw.optString("type") == "cell_repair_request") {
+                                val missing = data.optJSONArray("missing_indices") ?: return@runCatching
+                                app.cellsManager.noteRepairStarted(missing.length().coerceAtLeast(1))
+                                val blobId = data.optString("blob_id", "")
+                                val cid = data.optInt("conversation_id", 0)
+                                val row = app.messages.findLocalMedia(blobId) ?: return@runCatching
+                                val indices =
+                                    (0 until missing.length()).mapNotNull {
+                                        missing.optInt(it).takeIf { i -> i >= 0 }
+                                    }
+                                app.cellsManager.repairFromLocal(
+                                    t,
+                                    blobId,
+                                    cid,
+                                    File(row.localPath),
+                                    row.mime,
+                                    indices,
+                                )
+                            }
+                        }.onFailure { e ->
+                            android.util.Log.w("ProtoNavHost", "cells realtime", e)
                         }
                     }
                     ProtoEventHub.bump()
@@ -656,20 +664,21 @@ fun ProtoNavHost(
                 val reduceMotion by app.prefs.reduceMotionEnabled.collectAsState(initial = false)
                 val textScale by app.prefs.textSizeScale.collectAsState(initial = 1f)
                 val languageCode by app.prefs.languageCodeFlow.collectAsState(initial = "en")
-                var showWhatsNew115 by remember { mutableStateOf(false) }
+                var showWhatsNew by remember { mutableStateOf(false) }
                 LaunchedEffect(authToken) {
-                    if (!authToken.isNullOrBlank() && !app.prefs.hasSeenWhatsNew115()) {
-                        showWhatsNew115 = true
+                    val code = org.assistix.proto.nativeapp.BuildConfig.VERSION_CODE
+                    if (!authToken.isNullOrBlank() && !app.prefs.hasSeenWhatsNewForBuild(code)) {
+                        showWhatsNew = true
                     }
                 }
-                if (showWhatsNew115) {
+                if (showWhatsNew) {
                     ProtoWhatsNewDialog(
-                        title = UiStrings.whatsNew115Title,
-                        bullets = UiStrings.whatsNew115Bullets,
+                        title = UiStrings.whatsNewCurrentTitle,
+                        bullets = UiStrings.whatsNewCurrentBullets,
                         onDismiss = {
                             scope.launch {
-                                app.prefs.setSeenWhatsNew115()
-                                showWhatsNew115 = false
+                                app.prefs.setSeenWhatsNewForBuild(org.assistix.proto.nativeapp.BuildConfig.VERSION_CODE)
+                                showWhatsNew = false
                             }
                         },
                     )
@@ -852,6 +861,7 @@ fun ProtoNavHost(
                                     onOpenCache = { nav.navigate("cache_settings") },
                                     onOpenDataStorage = { nav.navigate("data_storage") },
                                     onOpenCells = { nav.navigate("proto_cells") },
+                                    onOpenHealth = { nav.navigate("proto_health") },
                                     onOpenOnboarding = openOnboarding,
                                     onOpenQrHub = { nav.navigate("qr_hub") },
                                     onLogout = { performSignOut() },
@@ -1125,7 +1135,15 @@ fun ProtoNavHost(
                 ProtoDataStorageScreen(onBack = { nav.popBackStack() })
             }
             composable("proto_cells") {
+                val homeToken by session.tokenFlow.collectAsState(initial = null)
+                val cellsApp = LocalContext.current.applicationContext as org.assistix.proto.nativeapp.ProtoApplication
+                LaunchedEffect(homeToken) {
+                    homeToken?.let { cellsApp.cellsManager.refreshStats(it) }
+                }
                 ProtoCellsScreen(onBack = { nav.popBackStack() })
+            }
+            composable("proto_health") {
+                ProtoHealthScreen(onBack = { nav.popBackStack() })
             }
             composable("devices_scan") {
                 LinkQrScannerScreen(
@@ -1990,10 +2008,21 @@ private fun ChatListScreen(
 
     val groupChats = chats.filter { it.kind == "group" }
     var queuedOutbox by remember { mutableIntStateOf(0) }
+    val cellsStats by app.cellsManager.stats.collectAsState()
+    val cellsRepair by app.cellsManager.repairActive.collectAsState()
     LaunchedEffect(online) {
         while (isActive) {
             queuedOutbox = withContext(Dispatchers.IO) { app.messages.pendingOutboxCount() }
             delay(2500)
+        }
+    }
+    LaunchedEffect(online, authToken) {
+        val t = authToken ?: return@LaunchedEffect
+        while (isActive) {
+            if (online) {
+                runCatching { app.cellsManager.refreshStats(t) }
+            }
+            delay(60_000)
         }
     }
     val recentFabChats =
@@ -2012,7 +2041,13 @@ private fun ChatListScreen(
         }
 
     Column(Modifier.fillMaxSize()) {
-        ProtoOfflineBanner(offline = !online, queuedCount = queuedOutbox)
+        ProtoGlobalProgressBar()
+        ProtoOfflineBanner(
+            offline = !online,
+            queuedCount = queuedOutbox,
+            cellsPending = cellsStats.holdsPending,
+            cellsRepairing = cellsRepair,
+        )
         if (forwardActive && forwardMsg != null) {
             ForwardModeBar(
                 messageCount = ProtoForwardState.messages.size,

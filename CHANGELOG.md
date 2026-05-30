@@ -4,30 +4,45 @@ All notable changes to the **PROTO Android** open client source are documented h
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.1.5] — 2026-05-30
+## [1.1.6] — 2026-05-30
 
-**versionCode:** 107 · **Tag:** [v1.1.5](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.5)
+**versionCode:** 110 · **Tag:** [v1.1.6](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.6)
 
-**PROTO Cells** — mandatory encrypted shard mesh for media. See [docs/PROTO_CELLS.md](docs/PROTO_CELLS.md).
+**Stable** release — fixes crashes and storage issues from **1.1.5**. Recommended for all builds.
 
-### Added
+### Fixed
 
-- **PROTO Cells** — AES-256-GCM encrypted media split into 7 gzip-compressed shards, distributed across devices (`ProtoCellsManager`, `data/cells/*`)
-- **Mandatory enrollment** — every signed-in user auto-volunteers (768 MB default quota)
-- **Cells UI** — dedicated explainer screen in onboarding and Settings (`ProtoCellsScreen`)
-- **Media threshold** — blobs from **8 KB** enter the Cells mesh automatically
-- **Background sync** — `syncMyHolds`, repair, heartbeat every 2 minutes
-- **What's New 1.1.5** dialog
+- **Launch crashes on Android 11+** — settings and local data moved to protected app storage (`ProtoPersistentStorage`)
+- **Corrupted DB / prefs recovery** — automatic rebuild when Room or DataStore files are damaged
+- **PROTO Cells stability** — safer background sync, repair, and maintenance loops
+- Crashes and edge cases in settings, onboarding, and chat flows
 
 ### Improved
 
-- Smarter mesh for small groups (triple replication, repair from local copy)
-- `ProtoMediaResolver` falls back to Cells when CDN relay expires
-- API client: full `/api/cells.php` action surface in `ProtoApi.kt`
+- **Cells-P encoding** — 7 data stripes + 1 XOR parity shard (8 total); one missing data shard recovers automatically
+- Cells stats UI in Settings (node tier, storage quota)
+- Legacy 7-shard mirror blobs still supported as fallback
 
-### Documentation
+### Notes
 
-- [docs/PROTO_CELLS.md](docs/PROTO_CELLS.md) — architecture, crypto, lifecycle, code map (RU + EN summary)
+- **Do not use [1.1.5](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.5)** for production — marked **unstable** (known crashes).
+
+---
+
+## [1.1.5] — 2026-05-30 · ⚠️ UNSTABLE
+
+**versionCode:** 107 · **Tag:** [v1.1.5](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.5)
+
+> **Not recommended.** Known launch crashes on Android 11+ and Cells-related instability.  
+> **Use [1.1.6](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.6) instead.**
+
+First public **PROTO Cells** release. Kept in history for reference only.
+
+### Added
+
+- **PROTO Cells** — AES-256-GCM encrypted media mesh (`ProtoCellsManager`, `data/cells/*`)
+- Mandatory enrollment, Cells UI, media from 8 KB, background sync
+- [docs/PROTO_CELLS.md](docs/PROTO_CELLS.md)
 
 ---
 
@@ -39,12 +54,8 @@ Refinement release: smarter Pulse, offline polish, and chat-list UX.
 
 ### Improved
 
-- **Chat Pulse** — full conversation context and contact-aware Assistix replies
-- **Assistix language** — AI replies match app language without bracket translations
-- **Archive UX** — pull chat list down to open archive folder; deeper swipe for pin/archive
-- **Offline** — queued messages, cached avatars, and link preview persistence
-- **Connectivity advisor**, app update UI, WebRTC ICE, API origin fallback
-- Localization (EN / RU / IT)
+- **Chat Pulse**, **Assistix language**, **Archive UX**, **Offline** polish
+- Connectivity advisor, app update UI, WebRTC ICE, API origin fallback
 
 ---
 
@@ -54,11 +65,6 @@ Refinement release: smarter Pulse, offline polish, and chat-list UX.
 
 First stable public source release after the early `1.0.99` preview.
 
-### Added
-
-- **Chat Pulse**, **Assistix usage budget**, **Offline vault**, **Connectivity advisor**
-- **Archive folder row**, **What's New dialog**
-
 ---
 
 ## [1.0.99] — 2026-05-30
@@ -66,9 +72,8 @@ First stable public source release after the early `1.0.99` preview.
 **versionCode:** 99 · Early public preview
 
 - Initial open-source client drop
-- Jetpack Compose UI, WebRTC calls, whisper.cpp STT, Glance widgets
-- PASAL license and contributor documentation
 
+[1.1.6]: https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.6
 [1.1.5]: https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.5
 [1.1.2]: https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.2
 [1.1.1]: https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.1

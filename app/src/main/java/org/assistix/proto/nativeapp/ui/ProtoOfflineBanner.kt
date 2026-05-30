@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,9 +17,11 @@ import androidx.compose.ui.unit.dp
 fun ProtoOfflineBanner(
     offline: Boolean,
     queuedCount: Int = 0,
+    cellsPending: Int = 0,
+    cellsRepairing: Int = 0,
     modifier: Modifier = Modifier,
 ) {
-    if (!offline && queuedCount <= 0) return
+    if (!offline && queuedCount <= 0 && cellsPending <= 0 && cellsRepairing <= 0) return
     val bg =
         if (offline) {
             MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.92f)
@@ -47,6 +50,13 @@ fun ProtoOfflineBanner(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
+            Text(
+                UiStrings.offlineSendWhenOnline,
+                style = MaterialTheme.typography.labelSmall,
+                color = fg.copy(alpha = 0.9f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+            )
         }
         if (queuedCount > 0) {
             Text(
@@ -55,7 +65,33 @@ fun ProtoOfflineBanner(
                 fontWeight = if (offline) FontWeight.Normal else FontWeight.Medium,
                 color = fg.copy(alpha = 0.92f),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(top = if (offline) 2.dp else 0.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = if (offline) 4.dp else 0.dp),
+            )
+        }
+        if (cellsRepairing > 0) {
+            Text(
+                UiStrings.cellsRepairBadge,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = fg,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            )
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                color = ProtoOrange,
+            )
+        } else if (cellsPending > 0) {
+            Text(
+                UiStrings.cellsPendingHoldsFmt(cellsPending),
+                style = MaterialTheme.typography.labelSmall,
+                color = fg.copy(alpha = 0.92f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            )
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                color = ProtoOrange.copy(0.7f),
             )
         }
     }
