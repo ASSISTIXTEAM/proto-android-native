@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.assistix.proto.nativeapp.data.ConnectivityWarningKind
 import org.assistix.proto.nativeapp.data.ProtoConnectivityAdvisor
 
 @Composable
@@ -29,9 +30,22 @@ fun ProtoConnectivityBanner(
     advisor: ProtoConnectivityAdvisor,
     modifier: Modifier = Modifier,
 ) {
-    val visible by advisor.showWarning.collectAsState()
-    if (!visible) return
+    val kind by advisor.warningKind.collectAsState()
+    val k = kind ?: return
     val scope = rememberCoroutineScope()
+    val (title, body) =
+        when (k) {
+            ConnectivityWarningKind.Vpn ->
+                UiStrings.connectivityVpnTitle to UiStrings.connectivityVpnBody
+            ConnectivityWarningKind.Foreign ->
+                UiStrings.connectivityForeignTitle to UiStrings.connectivityForeignBody
+            ConnectivityWarningKind.Slow ->
+                UiStrings.connectivitySlowTitle to UiStrings.connectivitySlowBody
+            ConnectivityWarningKind.VpnForeign ->
+                UiStrings.connectivityVpnForeignTitle to UiStrings.connectivityVpnForeignBody
+            ConnectivityWarningKind.ForeignSlow ->
+                UiStrings.connectivityForeignSlowTitle to UiStrings.connectivityForeignSlowBody
+        }
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.92f),
@@ -52,13 +66,13 @@ fun ProtoConnectivityBanner(
             )
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    UiStrings.connectivityWarningTitle,
+                    title,
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                 )
                 Text(
-                    UiStrings.connectivityWarningBody,
+                    body,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                 )

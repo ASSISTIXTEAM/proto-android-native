@@ -48,8 +48,13 @@ fun ProtoAvatar(
     LaunchedEffect(uploadId, token) {
         cachedFile = null
         val id = uploadId?.trim()?.takeIf { it.isNotEmpty() } ?: return@LaunchedEffect
-        val t = token?.takeIf { it.isNotBlank() } ?: return@LaunchedEffect
         val cache = app?.cache ?: return@LaunchedEffect
+        val dest = cache.avatarFile(id)
+        if (dest.exists() && dest.length() > 0L) {
+            cachedFile = dest
+            return@LaunchedEffect
+        }
+        val t = token?.takeIf { it.isNotBlank() } ?: return@LaunchedEffect
         cachedFile = ProtoAvatarCache.localFile(cache, api, t, id)
     }
     val cached = cachedFile

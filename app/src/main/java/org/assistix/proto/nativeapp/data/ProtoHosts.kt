@@ -1,6 +1,6 @@
 package org.assistix.proto.nativeapp.data
 
-/** Default public hostnames; override via secrets.properties / BuildConfig.API_ORIGIN. */
+/** Public PROTO hostnames (see proto.su/config/domains.php). */
 object ProtoHosts {
     const val SITE_ORIGIN = "https://proto.su"
     const val API_ORIGIN = "https://api.proto.su"

@@ -3,12 +3,12 @@ package org.assistix.proto.nativeapp.data
 import org.assistix.proto.nativeapp.BuildConfig
 import org.webrtc.PeerConnection
 
-/** STUN/TURN pack for WebRTC calls; merged with API-provided ICE servers on device. */
+/** Public STUN/TURN pack — works without own coturn; merged with API list on device. */
 object ProtoCallConfig {
     private const val OPEN_RELAY_USER = "openrelayproject"
     private const val OPEN_RELAY_PASS = "openrelayproject"
 
-    private fun customTurnFromBuildConfig(): RtcIceServer? {
+    private fun protoVpsTurn(): RtcIceServer? {
         val host = BuildConfig.TURN_HOST.trim()
         val user = BuildConfig.TURN_USER.trim()
         val cred = BuildConfig.TURN_CRED.trim()
@@ -19,6 +19,9 @@ object ProtoCallConfig {
                 "turn:$host:3478",
                 "turn:$host:3478?transport=udp",
                 "turn:$host:3478?transport=tcp",
+                "turn:turn.proto.su:3478",
+                "turn:turn.proto.su:3478?transport=udp",
+                "turn:turn.proto.su:3478?transport=tcp",
             ),
             user,
             cred,
@@ -45,7 +48,7 @@ object ProtoCallConfig {
 
     fun fallbackIceServers(): List<RtcIceServer> =
         listOfNotNull(
-            customTurnFromBuildConfig(),
+            protoVpsTurn(),
             meteredOpenRelay(),
             RtcIceServer(listOf("stun:stun.l.google.com:19302"), null, null),
             RtcIceServer(listOf("stun:stun1.l.google.com:19302"), null, null),
@@ -58,6 +61,9 @@ object ProtoCallConfig {
             RtcIceServer(listOf("stun:stun.stunprotocol.org:3478"), null, null),
             RtcIceServer(listOf("stun:stun.voip.blackberry.com:3478"), null, null),
             RtcIceServer(listOf("stun:stun.communication.microsoft.com:3478"), null, null),
+            RtcIceServer(listOf("stun:stun.numlex.ru"), null, null),
+            RtcIceServer(listOf("stun:stun.lds.net.ua"), null, null),
+            RtcIceServer(listOf("stun:stun.voipstunt.com"), null, null),
         )
 
     fun mergeIceServers(primary: List<RtcIceServer>): List<RtcIceServer> {

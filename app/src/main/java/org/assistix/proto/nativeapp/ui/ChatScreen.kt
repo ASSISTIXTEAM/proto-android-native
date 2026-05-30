@@ -551,10 +551,16 @@ fun ChatScreen(
         val t = token ?: return@LaunchedEffect
         peerProfile =
             if (peerUserId > 0) {
-                withContext(Dispatchers.IO) { api.userById(t, peerUserId) }
+                withContext(Dispatchers.IO) { app.profileCache.loadUser(t, peerUserId) }
             } else {
                 null
             }
+        val av = peerProfile?.avatarUploadId
+        if (!av.isNullOrBlank() && !t.isNullOrBlank()) {
+            withContext(Dispatchers.IO) {
+                org.assistix.proto.nativeapp.data.ProtoAvatarCache.localFile(app.cache, api, t, av)
+            }
+        }
     }
 
     fun exportChatText() {
@@ -2538,12 +2544,25 @@ fun ChatScreen(
             }
             if (chatPulseOpen && aiEnabled) {
                 val pulseSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-                val previewLines =
-                    remember(msgs) {
-                        msgs.takeLast(30).map { m ->
-                            val who = if (m.mine) "You" else "Them"
-                            "$who: ${m.body.take(100)}"
-                        }
+                val pulseContext =
+                    remember(msgs, peerProfile, chatNote, title, isGroup, isChannel, isSaved, peerUserId, myUserId) {
+                        org.assistix.proto.nativeapp.data.PulseChatContextBuilder.build(
+                            chatTitle = title,
+                            chatKind = when {
+                                isSaved -> "saved"
+                                isChannel -> "channel"
+                                isGroup -> "group"
+                                else -> "dm"
+                            },
+                            isGroup = isGroup,
+                            isChannel = isChannel,
+                            isSaved = isSaved,
+                            peerUserId = peerUserId,
+                            peer = peerProfile,
+                            chatNote = chatNote,
+                            msgs = msgs,
+                            myUserId = myUserId,
+                        )
                     }
                 LaunchedEffect(chatPulseOpen, token) {
                     val t = token ?: return@LaunchedEffect
@@ -2567,8 +2586,7 @@ fun ChatScreen(
                         token = token,
                         api = api,
                         languageCode = languageCode,
-                        chatTitle = title,
-                        messagePreviewLines = previewLines,
+                        pulseContext = pulseContext,
                         initialPrompt = chatPulseSeed,
                         onClose = {
                             chatPulseOpen = false
@@ -2881,6 +2899,16 @@ private fun MessageBubble(
                     Spacer(Modifier.size(4.dp))
                 }
                 Text(formatTime(msg.createdAt), fontSize = 10.sp, color = fg.copy(alpha = 0.75f))
+                if (msg.mine && !isCall) {
+                    if (msg.status == "queued" || msg.status == "sending") {
+                        Spacer(Modifier.size(2.dp))
+                        Text(
+                            UiStrings.messageQueuedOffline,
+                            fontSize = 10.sp,
+                            color = fg.copy(alpha = 0.78f),
+                        )
+                    }
+                }
                 if (msg.mine && !isCall && showReadReceipts) {
                     Spacer(Modifier.size(4.dp))
                     val ticks =

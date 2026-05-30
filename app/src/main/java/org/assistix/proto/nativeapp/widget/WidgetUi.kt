@@ -518,6 +518,29 @@ fun QuickChatContent(snapshot: WidgetSnapshot) {
             WidgetLoggedOut()
         } else {
             WidgetBrandHeader(snapshot, compact = true)
+            val pulseLine =
+                when {
+                    snapshot.aiBrief.isNotBlank() ->
+                        "⚡ ${snapshot.aiBrief.replace('\n', ' ').trim().take(88)}"
+                    snapshot.totalUnread > 0 ->
+                        snapshot.chats.firstOrNull { it.unreadCount > 0 }?.let { c ->
+                            "● ${c.displayTitle()}: ${c.previewShort(56)}"
+                        }
+                    else -> null
+                }
+            if (!pulseLine.isNullOrBlank()) {
+                Spacer(GlanceModifier.height(6.dp))
+                Box(
+                    modifier =
+                        GlanceModifier
+                            .fillMaxWidth()
+                            .cornerRadius(12.dp)
+                            .background(ImageProvider(R.drawable.widget_surface_card_unread))
+                            .padding(10.dp),
+                ) {
+                    Text(pulseLine, style = stylePreview, maxLines = 2)
+                }
+            }
             val dms =
                 snapshot.chats
                     .filter { it.kind == "dm" && it.peerUserId > 0 }

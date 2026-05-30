@@ -14,13 +14,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ProtoWhatsNewDialog(onDismiss: () -> Unit) {
+fun ProtoWhatsNewDialog(
+    title: String = UiStrings.whatsNewTitle,
+    bullets: List<String> = UiStrings.whatsNew148Bullets,
+    onDismiss: () -> Unit,
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(UiStrings.whatsNewTitle) },
+        title = { Text(title) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
-                UiStrings.whatsNew148Bullets.forEach { line ->
+                bullets.forEach { line ->
                     Text("• $line", style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(6.dp))
                 }

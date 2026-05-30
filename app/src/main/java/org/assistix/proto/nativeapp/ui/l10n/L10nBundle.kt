@@ -856,9 +856,25 @@ class L10nBundle {
     var assistixTokensResetFmt: String = "Resets in %1\$d h %2\$d min"
     var languageBuddyOriginal: String = "Original"
     var deviceGeoFmt: String = "%1\$s · %2\$s"
-    var connectivityWarningTitle: String = "VPN or foreign network"
-    var connectivityWarningBody: String =
-        "PROTO may work poorly with VPN or a non-Russian IP due to Russian internet restrictions (RKN). Try disabling VPN or using a Russian VPN server abroad. Informational only."
+    var connectivityVpnTitle: String = "VPN detected"
+    var connectivityVpnBody: String =
+        "PROTO may work poorly over VPN (RKN routing). Try turning VPN off or a Russian server. Informational only."
+    var connectivityForeignTitle: String = "Non-Russian network"
+    var connectivityForeignBody: String =
+        "Connection looks outside Russia. Calls and media may be unstable (RKN) — not a block by PROTO."
+    var connectivitySlowTitle: String = "Slow connection to PROTO"
+    var connectivitySlowBody: String =
+        "Server responds slowly. If you use VPN, try turning it off or a Russian server."
+    var connectivityVpnForeignTitle: String = "VPN and foreign route"
+    var connectivityVpnForeignBody: String =
+        "VPN plus non-Russian IP often breaks PROTO (RKN). Disable VPN or use a Russian server."
+    var connectivityForeignSlowTitle: String = "Foreign IP and slow link"
+    var connectivityForeignSlowBody: String =
+        "Non-Russian routing and high latency — PROTO may feel broken."
+    var messageQueuedOffline: String = "Will send when online"
+    var updateStayOnScreenTitle: String = "Do not leave PROTO"
+    var updateStayOnScreenBody: String =
+        "While the update downloads, keep the app open until installation finishes."
     var updateInstallVpnHintTitle: String = "Install didn't start?"
     var updateInstallVpnHintBody: String =
         "If update install fails, disable VPN or use a Russian VPN server — foreign routes often break APK install and downloads (RKN restrictions)."
@@ -868,6 +884,8 @@ class L10nBundle {
     var widgetQuickChatDesc: String = "Three frequent contacts — open a chat in one tap"
     var whatsNewTitle: String = ""
     var whatsNewOk: String = "OK"
+    var whatsNew112Title: String = "What's new in PROTO 1.1.2"
+    var whatsNew112Bullets: List<String> = emptyList()
     var whatsNew148Bullets: List<String> = emptyList()
     var channelNick: String = "Channel @nick"
     var channelNickHint: String = "Latin letters, digits, _ (3–32)"
@@ -1769,8 +1787,21 @@ class L10nBundle {
         assistixTokensResetFmt = source.assistixTokensResetFmt
         languageBuddyOriginal = source.languageBuddyOriginal
         deviceGeoFmt = source.deviceGeoFmt
-        connectivityWarningTitle = source.connectivityWarningTitle
-        connectivityWarningBody = source.connectivityWarningBody
+        connectivityVpnTitle = source.connectivityVpnTitle
+        connectivityVpnBody = source.connectivityVpnBody
+        connectivityForeignTitle = source.connectivityForeignTitle
+        connectivityForeignBody = source.connectivityForeignBody
+        connectivitySlowTitle = source.connectivitySlowTitle
+        connectivitySlowBody = source.connectivitySlowBody
+        connectivityVpnForeignTitle = source.connectivityVpnForeignTitle
+        connectivityVpnForeignBody = source.connectivityVpnForeignBody
+        connectivityForeignSlowTitle = source.connectivityForeignSlowTitle
+        connectivityForeignSlowBody = source.connectivityForeignSlowBody
+        messageQueuedOffline = source.messageQueuedOffline
+        updateStayOnScreenTitle = source.updateStayOnScreenTitle
+        updateStayOnScreenBody = source.updateStayOnScreenBody
+        whatsNew112Title = source.whatsNew112Title
+        whatsNew112Bullets = source.whatsNew112Bullets
         updateInstallVpnHintTitle = source.updateInstallVpnHintTitle
         updateInstallVpnHintBody = source.updateInstallVpnHintBody
         loginAlertTitle = source.loginAlertTitle

@@ -4,6 +4,31 @@ All notable changes to the **PROTO Android** open client source are documented h
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.2] — 2026-05-30
+
+**versionCode:** 103 · **Tag:** [v1.1.2](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.2)
+
+Refinement release: smarter Pulse, offline polish, and chat-list UX.
+
+### Improved
+
+- **Chat Pulse** — full conversation context and contact-aware Assistix replies
+- **Assistix language** — AI replies match app language without bracket translations
+- **Archive UX** — pull chat list down to open archive folder; deeper swipe for pin/archive
+- **Offline** — queued messages, cached avatars, and link preview persistence
+- **Connectivity advisor** — clearer VPN / egress guidance copy
+- **App update UI** — notification and download flow tweaks
+- **WebRTC ICE** — additional public STUN fallbacks and `turn.proto.su` URLs in config
+- **API origin** — smarter fallback when `api.proto.su` returns HTML errors
+- Localization (EN / RU / IT) and widget polish
+
+### Public repo notes
+
+- Sanitized build: secrets via `secrets.properties.example` only
+- License: **PASAL v1.0**
+
+---
+
 ## [1.1.1] — 2026-05-30
 
 **versionCode:** 102 · **Tag:** [v1.1.1](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.1)
@@ -27,12 +52,6 @@ First stable public source release after the early `1.0.99` preview. Client-only
 - Draft prefs sync and network monitor edge cases
 - Localization strings (EN / RU / IT)
 
-### Public repo notes
-
-- Sanitized build: secrets via `secrets.properties.example` only
-- License: **PASAL v1.0** — contribute to PROTO, not fork competing messengers
-- ~1,200 lines changed vs `1.0.99` source drop
-
 ---
 
 ## [1.0.99] — 2026-05-30
@@ -43,5 +62,6 @@ First stable public source release after the early `1.0.99` preview. Client-only
 - Jetpack Compose UI, WebRTC calls, whisper.cpp STT, Glance widgets
 - PASAL license and contributor documentation
 
+[1.1.2]: https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.2
 [1.1.1]: https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.1
 [1.0.99]: https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.0.99

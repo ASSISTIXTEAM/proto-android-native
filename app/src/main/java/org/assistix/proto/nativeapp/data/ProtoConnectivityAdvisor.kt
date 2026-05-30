@@ -12,9 +12,16 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
+enum class ConnectivityWarningKind {
+    Vpn,
+    Foreign,
+    Slow,
+    VpnForeign,
+    ForeignSlow,
+}
+
 /**
- * Non-blocking hint when VPN or a non-RU egress may hurt PROTO (RKN / routing).
- * Does not block usage — informational only.
+ * Non-blocking connectivity hints: VPN, non-RU egress, slow API (RKN / routing).
  */
 class ProtoConnectivityAdvisor(
     context: Context,
@@ -26,30 +33,44 @@ class ProtoConnectivityAdvisor(
     private val keyCountry = stringPreferencesKey("geo_country")
     private val keyDismissedAt = longPreferencesKey("warning_dismissed_at")
 
-    private val _showWarning = MutableStateFlow(false)
-    val showWarning: StateFlow<Boolean> = _showWarning.asStateFlow()
+    private val _warningKind = MutableStateFlow<ConnectivityWarningKind?>(null)
+    val warningKind: StateFlow<ConnectivityWarningKind?> = _warningKind.asStateFlow()
 
     private val dismissTtlMs = 12 * 60 * 60 * 1000L
+    private val slowLatencyMs = 2800L
 
     suspend fun refresh() =
         withContext(Dispatchers.IO) {
             val vpn = network.isVpnActive()
             var country = store.data.map { it[keyCountry].orEmpty().uppercase() }.first()
+            var latencyMs = -1L
             if (network.checkOnline()) {
+                latencyMs = api.measureApiLatencyMs()
                 api.fetchGeoCountry()?.let { c ->
                     country = c.uppercase()
                     store.edit { it[keyCountry] = country }
                 }
             }
             val foreign = country.isNotBlank() && country != "RU"
+            val slow = latencyMs < 0 || latencyMs > slowLatencyMs
             val dismissedAt = store.data.map { it[keyDismissedAt] ?: 0L }.first()
             val dismissedRecently = System.currentTimeMillis() - dismissedAt < dismissTtlMs
-            _showWarning.value = (vpn || foreign) && !dismissedRecently
+
+            _warningKind.value =
+                when {
+                    dismissedRecently -> null
+                    vpn && foreign -> ConnectivityWarningKind.VpnForeign
+                    vpn -> ConnectivityWarningKind.Vpn
+                    foreign && slow -> ConnectivityWarningKind.ForeignSlow
+                    foreign -> ConnectivityWarningKind.Foreign
+                    slow && network.checkOnline() -> ConnectivityWarningKind.Slow
+                    else -> null
+                }
         }
 
     suspend fun dismissWarning() {
         store.edit { it[keyDismissedAt] = System.currentTimeMillis() }
-        _showWarning.value = false
+        _warningKind.value = null
     }
 
     fun isVpnActive(): Boolean = network.isVpnActive()

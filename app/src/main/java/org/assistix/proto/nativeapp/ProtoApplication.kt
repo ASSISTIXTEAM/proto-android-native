@@ -74,6 +74,7 @@ class ProtoApplication : Application() {
         super.onCreate()
         runCatching {
             ProtoPersistentStorage.initAndMigrate(this)
+            org.assistix.proto.nativeapp.data.ProtoLinkPreviewCache.attach(this)
             ProtoApiOrigin.init(this)
             ProtoApiOrigin.clearPreferredIfBroken(this)
             session = ProtoSessionStore(this)

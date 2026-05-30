@@ -580,6 +580,24 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
         return MeLoad(parseMeProfile(u), j.optRestriction("account_restriction"))
     }
 
+    /** Round-trip latency to API origin in ms, or -1 if unreachable. */
+    fun measureApiLatencyMs(): Long {
+        val start = System.nanoTime()
+        return try {
+            val req =
+                Request.Builder()
+                    .url(url("/api/geo.php"))
+                    .get()
+                    .build()
+            client.newCall(req).execute().use { res ->
+                if (!res.isSuccessful) return -1L
+            }
+            ((System.nanoTime() - start) / 1_000_000L).coerceAtLeast(0L)
+        } catch (_: Exception) {
+            -1L
+        }
+    }
+
     /** Public geo hint (Cloudflare country header on proto.su). Empty = unknown. */
     fun fetchGeoCountry(): String? =
         try {
@@ -1363,6 +1381,7 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
         style: String = "neutral",
         history: List<AssistixChatTurn> = emptyList(),
         previewLines: List<String> = emptyList(),
+        chatContext: String = "",
         searchHits: List<String> = emptyList(),
         language: String = "en",
         targetLanguage: String = language,
@@ -1388,6 +1407,9 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
             val prev = JSONArray()
             previewLines.forEach { prev.put(it) }
             payload.put("messages_preview", prev)
+        }
+        if (chatContext.isNotBlank()) {
+            payload.put("chat_context", chatContext.take(12_000))
         }
         if (searchHits.isNotEmpty()) {
             val hits = JSONArray()

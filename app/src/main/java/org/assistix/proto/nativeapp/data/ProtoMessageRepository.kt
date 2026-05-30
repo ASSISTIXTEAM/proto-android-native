@@ -223,6 +223,15 @@ class ProtoMessageRepository(
             var sent = 0
             for (item in dao.outboxAll()) {
                 if (item.retryCount > 15) continue
+                val existing =
+                    dao.messagesForConversation(item.conversationId)
+                        .find { it.localId == item.localId }
+                if (existing?.serverId != null && existing.serverId > 0L) {
+                    dao.deleteOutbox(item.localId)
+                    continue
+                }
+                if (existing?.status == "sending") continue
+                dao.updateStatus(item.localId, "sending")
                 val fwd = item.forwardJson?.let { parseForwardJson(it) }
                 val result =
                     api.sendMessage(
@@ -240,7 +249,7 @@ class ProtoMessageRepository(
                     sent++
                 } else {
                     dao.bumpOutboxRetry(item.localId)
-                    dao.updateStatus(item.localId, "queued")
+                    dao.updateStatus(item.localId, if (api.lastHttpOk) "failed" else "queued")
                 }
             }
             sent

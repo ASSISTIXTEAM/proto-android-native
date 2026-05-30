@@ -32,6 +32,7 @@ class ProtoAppPreferences(private val context: Context) {
     private val notifyMentionsOnlyKey = booleanPreferencesKey("notify_mentions_only")
     private val policyAcceptedVersionKey = stringPreferencesKey("policy_accepted_version")
     private val whatsNew148Seen = booleanPreferencesKey("whats_new_148_seen")
+    private val whatsNew112Seen = booleanPreferencesKey("whats_new_112_seen")
     private val linkPreviewsKey = booleanPreferencesKey("link_previews_in_chat")
     private val sendOnEnterKey = booleanPreferencesKey("send_on_enter")
     private val compactChatListKey = booleanPreferencesKey("compact_chat_list")
@@ -288,6 +289,13 @@ class ProtoAppPreferences(private val context: Context) {
 
     suspend fun setSeenWhatsNew148() {
         appPrefs.edit { it[whatsNew148Seen] = true }
+    }
+
+    suspend fun hasSeenWhatsNew112(): Boolean =
+        appPrefs.data.map { it[whatsNew112Seen] == true }.first()
+
+    suspend fun setSeenWhatsNew112() {
+        appPrefs.edit { it[whatsNew112Seen] = true }
     }
 
     val sttWifiOnlyHeavyModels: Flow<Boolean> =

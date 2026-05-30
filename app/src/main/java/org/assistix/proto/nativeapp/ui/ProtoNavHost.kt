@@ -613,18 +613,20 @@ fun ProtoNavHost(
                 val reduceMotion by app.prefs.reduceMotionEnabled.collectAsState(initial = false)
                 val textScale by app.prefs.textSizeScale.collectAsState(initial = 1f)
                 val languageCode by app.prefs.languageCodeFlow.collectAsState(initial = "en")
-                var showWhatsNew148 by remember { mutableStateOf(false) }
+                var showWhatsNew112 by remember { mutableStateOf(false) }
                 LaunchedEffect(authToken) {
-                    if (!authToken.isNullOrBlank() && !app.prefs.hasSeenWhatsNew148()) {
-                        showWhatsNew148 = true
+                    if (!authToken.isNullOrBlank() && !app.prefs.hasSeenWhatsNew112()) {
+                        showWhatsNew112 = true
                     }
                 }
-                if (showWhatsNew148) {
+                if (showWhatsNew112) {
                     ProtoWhatsNewDialog(
+                        title = UiStrings.whatsNew112Title,
+                        bullets = UiStrings.whatsNew112Bullets,
                         onDismiss = {
                             scope.launch {
-                                app.prefs.setSeenWhatsNew148()
-                                showWhatsNew148 = false
+                                app.prefs.setSeenWhatsNew112()
+                                showWhatsNew112 = false
                             }
                         },
                     )

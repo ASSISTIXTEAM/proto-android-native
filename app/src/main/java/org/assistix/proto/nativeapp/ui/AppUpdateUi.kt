@@ -150,6 +150,10 @@ fun MandatoryUpdateScreen(
                 lineHeight = 22.sp,
             )
             Spacer(Modifier.height(28.dp))
+            if (busy) {
+                Spacer(Modifier.height(14.dp))
+                UpdateStayOnScreenHint()
+            }
             if (!ready) {
                 LinearProgressIndicator(
                     progress = { animatedProgress.coerceIn(0.04f, 1f) },
@@ -298,7 +302,9 @@ fun AppUpdatePromptDialog(
                     textAlign = TextAlign.Center,
                 )
                 if (busy) {
-                    Spacer(Modifier.height(20.dp))
+                    Spacer(Modifier.height(12.dp))
+                    UpdateStayOnScreenHint()
+                    Spacer(Modifier.height(12.dp))
                     val anim by animateFloatAsState(
                         (phase as AppUpdatePhase.Downloading).progress.coerceIn(0f, 1f),
                         label = "optProg",
@@ -472,6 +478,34 @@ private fun UpdateBrandIcon(
         contentDescription = null,
         modifier = Modifier.size(size),
     )
+}
+
+@Composable
+fun UpdateStayOnScreenHint(modifier: Modifier = Modifier) {
+    Column(
+        modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color(0xFF1C1814))
+            .padding(14.dp),
+    ) {
+        Text(
+            UiStrings.updateStayOnScreenTitle,
+            color = ProtoOrange,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            UiStrings.updateStayOnScreenBody,
+            color = Color(0xFFCBD5E1),
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Center,
+            lineHeight = 18.sp,
+        )
+    }
 }
 
 @Composable

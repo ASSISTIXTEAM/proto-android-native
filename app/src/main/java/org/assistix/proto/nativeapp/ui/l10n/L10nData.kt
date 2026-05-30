@@ -761,14 +761,30 @@ object L10nData {
             pulseAllClear = "You're all caught up"
             protoLinkDiscuss = "Discuss in chat with Assistix"
             chatPulse = "Pulse"
-            chatPulseHint = "AI chat about this conversation — context from recent messages."
+            chatPulseHint = "AI sees this chat, contact info, and your notes — ask about people or context."
             chatPulseEmpty = "Ask Pulse about this chat: decisions, drafts, what you missed."
             chatPulseInputHint = "Message Pulse…"
             languageBuddyOriginal = "Original"
             deviceGeoFmt = "%1\$s · %2\$s"
-            connectivityWarningTitle = "VPN or foreign network"
-            connectivityWarningBody =
-                "PROTO may work poorly: Russia has strict internet restrictions (including for users abroad), and routing through VPN or a non‑Russian IP often breaks calls, media, and updates. We can't fix this — it's Roskomnadzor policy. Try turning VPN off, or use a Russian VPN server if you're outside Russia. This is only a hint, not a block."
+            connectivityVpnTitle = "VPN detected"
+            connectivityVpnBody =
+                "PROTO may work poorly over VPN because of Russian routing restrictions (RKN). Try turning VPN off or using a Russian server. This is only a hint."
+            connectivityForeignTitle = "Non-Russian network"
+            connectivityForeignBody =
+                "Your connection looks outside Russia. Calls, media, and updates may be unstable due to RKN policy — not a block by PROTO."
+            connectivitySlowTitle = "Slow connection to PROTO"
+            connectivitySlowBody =
+                "The server responds slowly right now. If you use VPN, try turning it off or switch to a Russian server."
+            connectivityVpnForeignTitle = "VPN and foreign route"
+            connectivityVpnForeignBody =
+                "VPN plus a non-Russian IP often breaks PROTO (RKN restrictions). Disable VPN or use a Russian VPN server."
+            connectivityForeignSlowTitle = "Foreign IP and slow link"
+            connectivityForeignSlowBody =
+                "Non-Russian routing and high latency — PROTO may feel broken. VPN off or a Russian server may help."
+            messageQueuedOffline = "Will send when online"
+            updateStayOnScreenTitle = "Do not leave PROTO"
+            updateStayOnScreenBody =
+                "While the update downloads, keep the app open: do not close PROTO, lock the screen for long, or switch away until installation finishes."
             updateInstallVpnHintTitle = "Install didn't start?"
             updateInstallVpnHintBody =
                 "If the APK won't install or download fails, disable VPN or switch to a Russian server. Foreign IPs and VPN tunnels often break installs and API access because of Russian network restrictions (RKN). PROTO isn't blocking you — the route is."
@@ -776,6 +792,14 @@ object L10nData {
             shareIntoProto = "Share to PROTO"
             widgetQuickChatLabel = "PROTO · Quick chat"
             widgetQuickChatDesc = "Three frequent contacts — one tap to message"
+            whatsNew112Title = "What's new in PROTO 1.1.2"
+            whatsNew112Bullets = listOf(
+                "Pulse in chat knows the contact and full conversation context",
+                "AI replies only in your app language — no translations in brackets",
+                "Archive: pull the chat list down to open the archive folder",
+                "Pin and archive need a deeper swipe — fewer accidents",
+                "Offline: queued messages, cached avatars, and link previews",
+            )
             whatsNewTitle = "What's new in PROTO 1.0.48"
             whatsNewOk = "Got it"
             whatsNew148Bullets = listOf(
@@ -1685,14 +1709,30 @@ object L10nData {
             pulseAllClear = "На сегодня всё под контролем"
             protoLinkDiscuss = "Обсудить в чате с Assistix"
             chatPulse = "Pulse"
-            chatPulseHint = "Чат с PROTO AI по этой переписке — контекст из последних сообщений."
+            chatPulseHint = "AI видит чат, контакт и заметки — спрашивайте про людей и контекст."
             chatPulseEmpty = "Спросите Pulse про чат: решения, черновики, что пропустили."
             chatPulseInputHint = "Сообщение Pulse…"
             languageBuddyOriginal = "Оригинал"
             deviceGeoFmt = "%1\$s · %2\$s"
-            connectivityWarningTitle = "VPN или зарубежная сеть"
-            connectivityWarningBody =
-                "PROTO может работать нестабильно: в РФ жёсткие ограничения интернета (в том числе для пользователей за рубежом), а VPN или нероссийский IP часто ломают звонки, медиа и обновления. Мы тут ни при чём — это политика РКН. Попробуйте выключить VPN или включить российский сервер VPN, если вы не в России. Это только предупреждение, не блокировка."
+            connectivityVpnTitle = "Обнаружен VPN"
+            connectivityVpnBody =
+                "Через VPN PROTO может работать нестабильно из‑за ограничений маршрутизации (РКН). Попробуйте выключить VPN или российский сервер. Только подсказка."
+            connectivityForeignTitle = "Сеть не из России"
+            connectivityForeignBody =
+                "Похоже, вы не в российской сети. Звонки, медиа и обновления могут тормозить из‑за РКН — PROTO вас не блокирует."
+            connectivitySlowTitle = "Медленная связь с PROTO"
+            connectivitySlowBody =
+                "Сервер отвечает долго. Если включён VPN — выключите или переключитесь на российский сервер."
+            connectivityVpnForeignTitle = "VPN и зарубежный маршрут"
+            connectivityVpnForeignBody =
+                "VPN плюс нероссийский IP часто ломают PROTO (РКН). Выключите VPN или используйте российский сервер."
+            connectivityForeignSlowTitle = "Зарубежный IP и высокая задержка"
+            connectivityForeignSlowBody =
+                "Нероссийский маршрут и большая задержка — PROTO может «лагать». VPN off или российский сервер могут помочь."
+            messageQueuedOffline = "Отправится при подключении"
+            updateStayOnScreenTitle = "Не закрывайте PROTO"
+            updateStayOnScreenBody =
+                "Пока качается обновление, не сворачивайте и не закрывайте приложение, не выключайте экран надолго — дождитесь окончания установки."
             updateInstallVpnHintTitle = "Не ставится обновление?"
             updateInstallVpnHintBody =
                 "Если APK не скачивается или не устанавливается — отключите VPN или переключитесь на российский сервер. Зарубежные IP и туннели часто мешают установке и API из‑за ограничений сети (РКН). PROTO вас не блокирует — ломается маршрут."
@@ -1700,6 +1740,14 @@ object L10nData {
             shareIntoProto = "Поделиться в PROTO"
             widgetQuickChatLabel = "PROTO · Быстрый чат"
             widgetQuickChatDesc = "3 частых контакта — открыть чат в один тап"
+            whatsNew112Title = "Новое в PROTO 1.1.2"
+            whatsNew112Bullets = listOf(
+                "Pulse в чате знает контакт и полный контекст переписки",
+                "AI отвечает только на языке приложения — без переводов в скобках",
+                "Архив: потяните список чатов вниз, чтобы открыть папку архива",
+                "Закреп и архив — глубже свайп, меньше случайных срабатываний",
+                "Офлайн: очередь сообщений, кэш аватаров и превью ссылок",
+            )
             whatsNewTitle = "Новое в PROTO 1.0.48"
             whatsNewOk = "Понятно"
             whatsNew148Bullets = listOf(
