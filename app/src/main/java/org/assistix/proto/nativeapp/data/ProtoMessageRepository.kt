@@ -257,6 +257,12 @@ class ProtoMessageRepository(
 
     suspend fun pendingOutboxCount(): Int = withContext(Dispatchers.IO) { dao.outboxCount() }
 
+    suspend fun findLocalMedia(uploadId: String): org.assistix.proto.nativeapp.data.local.MediaLocalEntity? =
+        withContext(Dispatchers.IO) {
+            val id = normalizeUploadId(uploadId) ?: return@withContext null
+            dao.mediaLocal(id)
+        }
+
     suspend fun clearAll() {
         withContext(Dispatchers.IO) {
             dao.clearMessages()

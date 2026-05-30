@@ -107,6 +107,9 @@ private sealed interface OnboardSlide {
 
     data object Theme : OnboardSlide
 
+    /** Mandatory PROTO Cells — mutual encrypted hosting. */
+    data object Cells : OnboardSlide
+
     data object Policy : OnboardSlide
 }
 
@@ -125,6 +128,7 @@ private fun buildSlides(l: L10nBundle): List<OnboardSlide> =
         OnboardSlide.Permission(OnboardPermissionKind.Camera),
         OnboardSlide.Permission(OnboardPermissionKind.Media),
         OnboardSlide.Theme,
+        OnboardSlide.Cells,
         OnboardSlide.Policy,
     )
 
@@ -345,6 +349,7 @@ fun OnboardingFlow(
                                 themeMode = themeMode,
                                 onTheme = { mode -> scope.launch { themeStore.setMode(mode) } },
                             )
+                        OnboardSlide.Cells -> OnboardCellsPage()
                         OnboardSlide.Policy -> {
                             val bundle = AppLocale.bundleFor(pendingLang)
                             Column(

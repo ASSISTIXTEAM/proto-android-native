@@ -17,8 +17,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         AssistixThreadEntity::class,
         AssistixMessageEntity::class,
         MessageTranslationEntity::class,
+        MediaLocalEntity::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = false,
 )
 abstract class ProtoDatabase : RoomDatabase() {
@@ -87,11 +88,29 @@ abstract class ProtoDatabase : RoomDatabase() {
                 }
             }
 
+        private val MIGRATION_11_12 =
+            object : Migration(11, 12) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        """
+                        CREATE TABLE IF NOT EXISTS media_local (
+                            uploadId TEXT NOT NULL PRIMARY KEY,
+                            localPath TEXT NOT NULL,
+                            mime TEXT NOT NULL DEFAULT '',
+                            fileName TEXT NOT NULL DEFAULT '',
+                            sizeBytes INTEGER NOT NULL DEFAULT 0,
+                            savedAt INTEGER NOT NULL DEFAULT 0
+                        )
+                        """.trimIndent(),
+                    )
+                }
+            }
+
         private fun build(context: Context): ProtoDatabase {
             ProtoPersistentStorage.initAndMigrate(context)
             val dbFile = ProtoPersistentStorage.databaseFile(context)
             return Room.databaseBuilder(context, ProtoDatabase::class.java, dbFile.absolutePath)
-                .addMigrations(MIGRATION_9_10, MIGRATION_10_11)
+                .addMigrations(MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
                 .build()
         }
     }

@@ -3,6 +3,7 @@ package org.assistix.proto.nativeapp.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -146,6 +148,7 @@ fun SettingsNavRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
+    iconRes: Int? = null,
     danger: Boolean = false,
 ) {
     val haptic = ProtoHaptics.rememberSender()
@@ -161,7 +164,7 @@ fun SettingsNavRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        if (icon != null) {
+        if (iconRes != null || icon != null) {
             Box(
                 Modifier
                     .size(48.dp)
@@ -172,12 +175,21 @@ fun SettingsNavRow(
                     ),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
-                    icon,
-                    contentDescription = null,
-                    tint = if (danger) MaterialTheme.colorScheme.error else ProtoOrange,
-                    modifier = Modifier.size(26.dp),
-                )
+                when {
+                    iconRes != null ->
+                        Image(
+                            painter = painterResource(iconRes),
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                        )
+                    icon != null ->
+                        Icon(
+                            icon,
+                            contentDescription = null,
+                            tint = if (danger) MaterialTheme.colorScheme.error else ProtoOrange,
+                            modifier = Modifier.size(26.dp),
+                        )
+                }
             }
         }
         Column(Modifier.weight(1f)) {

@@ -311,6 +311,8 @@ fun ChatScreen(
                     val uploadId = withContext(Dispatchers.IO) { api.uploadFile(t, prepared.first, prepared.second) }
                     if (uploadId != null) {
                         withContext(Dispatchers.IO) {
+                            app.mediaResolver.persistOutgoing(uploadId, prepared.first, prepared.second, confirmed.displayName)
+                            app.cellsManager.publish(t, uploadId, conversationId, prepared.first, prepared.second)
                             if (isChannel && channelCanPost && confirmed.mime.startsWith("image/")) {
                                 api.publishChannelPost(t, conversationId, caption, uploadId)
                             } else {
@@ -331,6 +333,10 @@ fun ChatScreen(
                         val prepared = withContext(Dispatchers.IO) { ProtoMediaCompressor.prepareUploadFile(ctx, f, confirmed.mime) }
                         if (prepared.first.length() > ProtoMediaCompressor.MAX_UPLOAD_BYTES) continue
                         val uploadId = withContext(Dispatchers.IO) { api.uploadFile(t, prepared.first, prepared.second) } ?: continue
+                        withContext(Dispatchers.IO) {
+                            app.mediaResolver.persistOutgoing(uploadId, prepared.first, prepared.second, f.name)
+                            app.cellsManager.publish(t, uploadId, conversationId, prepared.first, prepared.second)
+                        }
                         items.add(AlbumItem(uploadId, confirmed.mime, f.name))
                     }
                     if (items.size >= 2) {
@@ -350,6 +356,8 @@ fun ChatScreen(
                     val uploadId = withContext(Dispatchers.IO) { api.uploadFile(t, trimmed, "audio/mp4") }
                     if (uploadId != null) {
                         withContext(Dispatchers.IO) {
+                            app.mediaResolver.persistOutgoing(uploadId, trimmed, "audio/mp4", "voice.m4a")
+                            app.cellsManager.publish(t, uploadId, conversationId, trimmed, "audio/mp4")
                             messages.sendMedia(t, conversationId, uploadId, "audio/mp4", "voice.m4a", "")
                         }
                         haptic(HapticKind.Send)

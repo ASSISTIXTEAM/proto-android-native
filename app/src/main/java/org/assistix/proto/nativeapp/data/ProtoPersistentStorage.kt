@@ -44,6 +44,8 @@ object ProtoPersistentStorage {
 
     fun exportsDir(context: Context): File = File(rootDir(context), "exports").apply { mkdirs() }
 
+    fun mediaDir(context: Context): File = File(rootDir(context), "media").apply { mkdirs() }
+
     fun prefsDir(context: Context): File = File(rootDir(context), "prefs").apply { mkdirs() }
 
     fun dataStoreFile(context: Context, name: String): File =

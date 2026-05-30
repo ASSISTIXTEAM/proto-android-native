@@ -122,7 +122,10 @@ object L10nData {
             sttServerFirstHint = "Server is only a fallback when the on-device model cannot finish."
             sttModelPickTitle = "Voice messages without internet"
             sttModelPickBody = "Slide from fast to powerful. PROTO suggests a level for your phone. Models download in the background."
-            storagePersistentHint = "Chats, drafts, media and models are stored in Documents/PROTO and stay after uninstall."
+            storagePersistentHint = "Chats and media live on your device in Documents/PROTO. The server only relays files briefly — not a cloud archive."
+            mediaRelayExpired = "Copy saved on another device — request re-send."
+            mediaRequestResend = "Request file"
+            mediaRelayRequested = "Request sent to chat participants"
             dataStorageTitle = "PROTO data on device"
             dataStorageHint = "All app data lives in Documents/PROTO — survives reinstall."
             dataStorageTotal = "Total"
@@ -800,6 +803,33 @@ object L10nData {
                 "Pin and archive need a deeper swipe — fewer accidents",
                 "Offline: queued messages, cached avatars, and link previews",
             )
+            whatsNew115Title = "What's new in PROTO 1.1.5"
+            whatsNew115Bullets = listOf(
+                "PROTO Cells is now mandatory — mutual encrypted hosting for all media",
+                "Dedicated Cells screen in onboarding and Settings",
+                "Gzip-compressed shards save space on every device",
+                "Smarter mesh for small groups — more copies, fewer gaps",
+                "Media from 8 KB joins the hive automatically",
+            )
+            cellsScreenTitle = "PROTO Cells"
+            cellsScreenTagline = "Mutual encrypted hosting for media"
+            cellsSettingsHint = "How it works · safety · why it's required"
+            cellsMandatoryTitle = "Required for everyone"
+            cellsMandatoryBody =
+                "Your photos and files live on devices across the network — including yours. Others host your encrypted shards; you host theirs. That's how PROTO stays fast without a giant server farm."
+            cellsSafeTitle = "Fully encrypted & safe"
+            cellsSafeBody =
+                "Each file is AES-256 encrypted before it leaves your phone. Holders only store random shards — nobody can open your media without the key in the chat catalog."
+            cellsHowTitle = "Smart & compact"
+            cellsHowBody =
+                "Files split into 7 shards with triple redundancy. Shards are gzip-compressed to save space. In small chats every member helps — even 10 people can protect 100+ files."
+            cellsBulletsTitle = "Why it's awesome"
+            cellsBullets = listOf(
+                "No one reads your files — only encrypted fragments",
+                "Server keeps a catalog, not full copies",
+                "Automatic repair when someone comes back online",
+                "Fair rule: your media is hosted, so you host too",
+            )
             whatsNewTitle = "What's new in PROTO 1.0.48"
             whatsNewOk = "Got it"
             whatsNew148Bullets = listOf(
@@ -1069,7 +1099,10 @@ object L10nData {
             sttServerFirstHint = "Сервер только если на устройстве не получилось."
             sttModelPickTitle = "Голосовые без интернета"
             sttModelPickBody = "Ползунок от быстрой к мощной модели. PROTO подберёт уровень под телефон. Загрузка в фоне."
-            storagePersistentHint = "Чаты, черновики, медиа и модели — в Documents/PROTO, остаются после удаления приложения."
+            storagePersistentHint = "Чаты и медиа хранятся на вашем устройстве в Documents/PROTO. Сервер только кратко ретранслирует файлы — это не облако."
+            mediaRelayExpired = "Копия на другом устройстве — можно запросить повторно."
+            mediaRequestResend = "Запросить файл"
+            mediaRelayRequested = "Запрос отправлен участникам чата"
             dataStorageTitle = "Данные PROTO на устройстве"
             dataStorageHint = "Всё хранится в Documents/PROTO — переживает переустановку."
             dataStorageTotal = "Всего"
@@ -1747,6 +1780,33 @@ object L10nData {
                 "Архив: потяните список чатов вниз, чтобы открыть папку архива",
                 "Закреп и архив — глубже свайп, меньше случайных срабатываний",
                 "Офлайн: очередь сообщений, кэш аватаров и превью ссылок",
+            )
+            whatsNew115Title = "Новое в PROTO 1.1.5"
+            whatsNew115Bullets = listOf(
+                "PROTO Cells обязателен — взаимное зашифрованное хранение медиа",
+                "Отдельный экран Cells в онбординге и в настройках",
+                "Шарды с gzip — меньше места на каждом устройстве",
+                "Умная сеть для малых групп — больше копий, меньше потерь",
+                "Медиа от 8 КБ автоматически попадает в сеть Cells",
+            )
+            cellsScreenTitle = "PROTO Cells"
+            cellsScreenTagline = "Взаимное зашифрованное хранение медиа"
+            cellsSettingsHint = "Как работает · безопасность · почему обязательно"
+            cellsMandatoryTitle = "Обязательно для всех"
+            cellsMandatoryBody =
+                "Твои фото и файлы живут на устройствах сети — в том числе на твоём. Другие хранят твои зашифрованные шарды, ты — их. Так PROTO быстрый без гигантского сервера."
+            cellsSafeTitle = "Полностью зашифровано и безопасно"
+            cellsSafeBody =
+                "Каждый файл шифруется AES-256 до отправки с телефона. У держателей только фрагменты — открыть медиа без ключа из каталога чата невозможно."
+            cellsHowTitle = "Умно и компактно"
+            cellsHowBody =
+                "Файл делится на 7 шардов с тройной репликацией. Шарды сжимаются gzip — экономия места. В маленьких чатах помогает каждый — 10 человек могут защитить 100+ файлов."
+            cellsBulletsTitle = "Почему это круто"
+            cellsBullets = listOf(
+                "Никто не читает файлы — только зашифрованные фрагменты",
+                "Сервер хранит каталог, а не полные копии",
+                "Автопочинка, когда кто-то снова онлайн",
+                "Честное правило: твоё медиа хостят — значит, и ты хостишь",
             )
             whatsNewTitle = "Новое в PROTO 1.0.48"
             whatsNewOk = "Понятно"

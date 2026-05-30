@@ -135,6 +135,9 @@ class L10nBundle {
     var sttSliderFast: String = ""
     var sttSliderPowerful: String = ""
     var storagePersistentHint: String = ""
+    var mediaRelayExpired: String = "File relay ended — saved on device."
+    var mediaRequestResend: String = "Request file"
+    var mediaRelayRequested: String = "Request sent"
     var dataStorageTitle: String = ""
     var dataStorageHint: String = ""
     var dataStorageTotal: String = ""
@@ -886,7 +889,23 @@ class L10nBundle {
     var whatsNewOk: String = "OK"
     var whatsNew112Title: String = "What's new in PROTO 1.1.2"
     var whatsNew112Bullets: List<String> = emptyList()
+    var whatsNew115Title: String = "What's new in PROTO 1.1.5"
+    var whatsNew115Bullets: List<String> = emptyList()
     var whatsNew148Bullets: List<String> = emptyList()
+    var cellsScreenTitle: String = "PROTO Cells"
+    var cellsScreenTagline: String = "Mutual encrypted hosting for media"
+    var cellsSettingsHint: String = "How it works · safety · why it's required"
+    var cellsMandatoryTitle: String = "Required for everyone"
+    var cellsMandatoryBody: String =
+        "Your photos and files live on devices across the network — including yours. Others host your encrypted shards; you host theirs. That's how PROTO stays fast without a giant server farm."
+    var cellsSafeTitle: String = "Fully encrypted & safe"
+    var cellsSafeBody: String =
+        "Each file is AES-256 encrypted before it leaves your phone. Holders only store random shards — nobody can open your media without the key in the chat catalog."
+    var cellsHowTitle: String = "Smart & compact"
+    var cellsHowBody: String =
+        "Files split into 7 shards with triple redundancy. Shards are gzip-compressed to save space. In small chats every member helps — even 10 people can protect 100+ files."
+    var cellsBulletsTitle: String = "Why it's awesome"
+    var cellsBullets: List<String> = emptyList()
     var channelNick: String = "Channel @nick"
     var channelNickHint: String = "Latin letters, digits, _ (3–32)"
     var channelDescription: String = "Description"
@@ -1066,6 +1085,9 @@ class L10nBundle {
         sttSliderFast = source.sttSliderFast
         sttSliderPowerful = source.sttSliderPowerful
         storagePersistentHint = source.storagePersistentHint
+        mediaRelayExpired = source.mediaRelayExpired
+        mediaRequestResend = source.mediaRequestResend
+        mediaRelayRequested = source.mediaRelayRequested
         dataStorageTitle = source.dataStorageTitle
         dataStorageHint = source.dataStorageHint
         dataStorageTotal = source.dataStorageTotal
@@ -1802,6 +1824,19 @@ class L10nBundle {
         updateStayOnScreenBody = source.updateStayOnScreenBody
         whatsNew112Title = source.whatsNew112Title
         whatsNew112Bullets = source.whatsNew112Bullets
+        whatsNew115Title = source.whatsNew115Title
+        whatsNew115Bullets = source.whatsNew115Bullets
+        cellsScreenTitle = source.cellsScreenTitle
+        cellsScreenTagline = source.cellsScreenTagline
+        cellsSettingsHint = source.cellsSettingsHint
+        cellsMandatoryTitle = source.cellsMandatoryTitle
+        cellsMandatoryBody = source.cellsMandatoryBody
+        cellsSafeTitle = source.cellsSafeTitle
+        cellsSafeBody = source.cellsSafeBody
+        cellsHowTitle = source.cellsHowTitle
+        cellsHowBody = source.cellsHowBody
+        cellsBulletsTitle = source.cellsBulletsTitle
+        cellsBullets = source.cellsBullets
         updateInstallVpnHintTitle = source.updateInstallVpnHintTitle
         updateInstallVpnHintBody = source.updateInstallVpnHintBody
         loginAlertTitle = source.loginAlertTitle

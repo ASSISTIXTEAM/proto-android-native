@@ -4,7 +4,7 @@
 
 **Нативный клиент мессенджера PROTO** — Kotlin, Jetpack Compose, звонки, виджеты, Assistix AI.
 
-[![Version](https://img.shields.io/badge/version-1.1.2-FF6B00?style=for-the-badge)](https://github.com/ASSISTIXTEAM/proto-android-native/releases)
+[![Version](https://img.shields.io/badge/version-1.1.5-FF6B00?style=for-the-badge)](https://github.com/ASSISTIXTEAM/proto-android-native/releases)
 [![Platform](https://img.shields.io/badge/Platform-Android_8%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Compose](https://img.shields.io/badge/Jetpack_Compose-UI-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
@@ -12,9 +12,9 @@
 [![Stars](https://img.shields.io/github/stars/ASSISTIXTEAM/proto-android-native?style=for-the-badge&logo=github&label=Stars)](https://github.com/ASSISTIXTEAM/proto-android-native/stargazers)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge)](CONTRIBUTING.md)
 
-[proto.su](https://proto.su) · [Releases](https://github.com/ASSISTIXTEAM/proto-android-native/releases) · [Changelog](CHANGELOG.md) · [Issues](https://github.com/ASSISTIXTEAM/proto-android-native/issues) · [Contributing](CONTRIBUTING.md) · [License](LICENSE)
+[proto.su](https://proto.su) · [Releases](https://github.com/ASSISTIXTEAM/proto-android-native/releases) · [Changelog](CHANGELOG.md) · [PROTO Cells](docs/PROTO_CELLS.md) · [Issues](https://github.com/ASSISTIXTEAM/proto-android-native/issues) · [Contributing](CONTRIBUTING.md) · [License](LICENSE)
 
-*Публичный релиз **1.1.2** · client-only source*
+*Публичный релиз **1.1.5** · client-only source · **PROTO Cells***
 
 </div>
 
@@ -48,6 +48,7 @@
 | 🌍 | **i18n** | EN / RU / IT и др. |
 | 🔐 | **Vault & PIN** | Защита чувствительных экранов |
 | 📷 | **QR & deep links** | Вход по QR, ссылки `proto.su` |
+| 🐝 | **[PROTO Cells](docs/PROTO_CELLS.md)** | Взаимное зашифрованное хранение медиа: 7 шардов, AES-256, gzip, mesh |
 
 > **Бэкенда нет.** Сервер, ключи продакшена и инфраструктура в репо не публикуются.
 
@@ -126,8 +127,8 @@ vendor/whisper.cpp/        vendored STT
 
 | | |
 |---|---|
-| **versionName** | `1.1.2` |
-| **versionCode** | `103` |
+| **versionName** | `1.1.5` |
+| **versionCode** | `107` |
 | **Статус** | stable public client source |
 
 ---

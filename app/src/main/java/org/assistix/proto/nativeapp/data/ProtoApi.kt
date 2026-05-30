@@ -14,6 +14,12 @@ import java.io.InputStreamReader
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+enum class MediaDownloadResult {
+    Ok,
+    ExpiredRelay,
+    Failed,
+}
+
 class ProtoApi(private val appContext: android.content.Context? = null) {
     private val jsonType = "application/json; charset=utf-8".toMediaType()
     @Volatile var lastHttpOk: Boolean = true
@@ -1638,7 +1644,7 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
         }
     }
 
-    fun downloadMedia(token: String, uploadId: String, dest: File): Boolean {
+    fun downloadMediaResult(token: String, uploadId: String, dest: File): MediaDownloadResult {
         val req =
             Request.Builder()
                 .url(mediaUrl(uploadId))
@@ -1648,13 +1654,236 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
                 .build()
         return try {
             client.newCall(req).execute().use { res ->
-                if (!res.isSuccessful) return false
-                dest.outputStream().use { out -> res.body?.byteStream()?.copyTo(out) }
-                true
+                when {
+                    res.code == 410 -> MediaDownloadResult.ExpiredRelay
+                    !res.isSuccessful -> MediaDownloadResult.Failed
+                    else -> {
+                        dest.parentFile?.mkdirs()
+                        dest.outputStream().use { out -> res.body?.byteStream()?.copyTo(out) }
+                        if (dest.exists() && dest.length() > 0L) MediaDownloadResult.Ok else MediaDownloadResult.Failed
+                    }
+                }
             }
         } catch (_: Exception) {
+            MediaDownloadResult.Failed
+        }
+    }
+
+    fun downloadMedia(token: String, uploadId: String, dest: File): Boolean =
+        downloadMediaResult(token, uploadId, dest) == MediaDownloadResult.Ok
+
+    fun ackMediaRelay(token: String, uploadId: String): Boolean {
+        val j =
+            authedPost(
+                token,
+                "/api/media.php",
+                JSONObject().put("action", "ack").put("upload_id", uploadId),
+            ) ?: return false
+        return j.optBoolean("ok", false)
+    }
+
+    fun requestMediaRelay(token: String, uploadId: String, conversationId: Int): Boolean {
+        val j =
+            authedPost(
+                token,
+                "/api/media-relay.php",
+                JSONObject()
+                    .put("action", "request")
+                    .put("upload_id", uploadId)
+                    .put("conversation_id", conversationId),
+            ) ?: return false
+        return j.optBoolean("ok", false)
+    }
+
+    fun refreshMediaRelay(
+        token: String,
+        uploadId: String,
+        conversationId: Int,
+        file: File,
+        mime: String,
+    ): Boolean {
+        val body =
+            MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("action", "refresh")
+                .addFormDataPart("upload_id", uploadId)
+                .addFormDataPart("conversation_id", conversationId.toString())
+                .addFormDataPart("file", file.name, file.asRequestBody(mime.toMediaType()))
+                .build()
+        val req =
+            Request.Builder()
+                .url(url("/api/media-relay.php"))
+                .header("Authorization", "Bearer $token")
+                .header("X-Proto-Session", token)
+                .post(body)
+                .build()
+        return try {
+            client.newCall(req).execute().use { res ->
+                lastHttpOk = res.isSuccessful
+                val j = parse(res.body?.string() ?: "")
+                res.isSuccessful && j.optBoolean("ok", false)
+            }
+        } catch (_: Exception) {
+            lastHttpOk = false
             false
         }
+    }
+
+    fun cellsRegisterBlob(
+        token: String,
+        blobId: String,
+        conversationId: Int,
+        mime: String,
+        plainSize: Int,
+        cipherSize: Int,
+        shardCount: Int,
+        cipherHash: String,
+        keyB64: String,
+        shardHashes: List<String>,
+    ): Boolean {
+        val arr = JSONArray()
+        shardHashes.forEach { arr.put(it) }
+        val j =
+            authedPost(
+                token,
+                "/api/cells.php",
+                JSONObject()
+                    .put("action", "register_blob")
+                    .put("blob_id", blobId)
+                    .put("conversation_id", conversationId)
+                    .put("mime", mime)
+                    .put("plain_size", plainSize)
+                    .put("cipher_size", cipherSize)
+                    .put("shard_count", shardCount)
+                    .put("cipher_hash", cipherHash)
+                    .put("key_b64", keyB64)
+                    .put("shard_hashes", arr),
+            ) ?: return false
+        return j.optBoolean("ok", false)
+    }
+
+    fun cellsPushShard(
+        token: String,
+        blobId: String,
+        shardIndex: Int,
+        shardHash: String,
+        data: ByteArray,
+    ): Boolean {
+        val tmp = File.createTempFile("proto_cell_", ".shard")
+        return try {
+            tmp.writeBytes(data)
+            val body =
+                MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("action", "push_shard")
+                    .addFormDataPart("blob_id", blobId)
+                    .addFormDataPart("shard_index", shardIndex.toString())
+                    .addFormDataPart("shard_hash", shardHash)
+                    .addFormDataPart(
+                        "shard",
+                        "s$shardIndex.bin",
+                        tmp.asRequestBody("application/octet-stream".toMediaType()),
+                    )
+                    .build()
+            val req =
+                Request.Builder()
+                    .url(url("/api/cells.php"))
+                    .header("Authorization", "Bearer $token")
+                    .header("X-Proto-Session", token)
+                    .post(body)
+                    .build()
+            client.newCall(req).execute().use { res ->
+                lastHttpOk = res.isSuccessful
+                val j = parse(res.body?.string() ?: "")
+                res.isSuccessful && j.optBoolean("ok", false)
+            }
+        } catch (_: Exception) {
+            lastHttpOk = false
+            false
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    fun cellsManifest(token: String, blobId: String): JSONObject? =
+        authedGet(token, "/api/cells.php?action=manifest&blob_id=$blobId")
+
+    fun cellsFetchShard(token: String, blobId: String, shardIndex: Int): ByteArray? {
+        val req =
+            Request.Builder()
+                .url(url("/api/cells.php?action=fetch_shard&blob_id=$blobId&shard_index=$shardIndex"))
+                .header("Authorization", "Bearer $token")
+                .header("X-Proto-Session", token)
+                .get()
+                .build()
+        return try {
+            client.newCall(req).execute().use { res ->
+                if (!res.isSuccessful) return@use null
+                res.body?.bytes()
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    fun cellsAckShard(token: String, blobId: String, shardIndex: Int): Boolean {
+        val j =
+            authedPost(
+                token,
+                "/api/cells.php",
+                JSONObject()
+                    .put("action", "ack_shard")
+                    .put("blob_id", blobId)
+                    .put("shard_index", shardIndex),
+            ) ?: return false
+        return j.optBoolean("ok", false)
+    }
+
+    fun cellsMyHolds(token: String): JSONArray? =
+        authedGet(token, "/api/cells.php?action=my_holds")?.optJSONArray("holds")
+
+    fun cellsVolunteer(token: String, enabled: Boolean, quotaBytes: Long): Boolean {
+        val j =
+            authedPost(
+                token,
+                "/api/cells.php",
+                JSONObject()
+                    .put("action", "volunteer")
+                    .put("enabled", if (enabled) 1 else 0)
+                    .put("quota_bytes", quotaBytes),
+            ) ?: return false
+        return j.optBoolean("ok", false)
+    }
+
+    fun cellsRepairRequest(
+        token: String,
+        blobId: String,
+        conversationId: Int,
+        missing: List<Int>,
+    ): Boolean {
+        val arr = JSONArray()
+        missing.forEach { arr.put(it) }
+        val j =
+            authedPost(
+                token,
+                "/api/cells.php",
+                JSONObject()
+                    .put("action", "repair_request")
+                    .put("blob_id", blobId)
+                    .put("conversation_id", conversationId)
+                    .put("missing_indices", arr),
+            ) ?: return false
+        return j.optBoolean("ok", false)
+    }
+
+    fun cellsHeartbeat(token: String, holds: JSONArray): Boolean {
+        val j =
+            authedPost(
+                token,
+                "/api/cells.php",
+                JSONObject().put("action", "heartbeat").put("holds", holds),
+            ) ?: return false
+        return j.optBoolean("ok", false)
     }
 
     fun rtcConfig(token: String): List<RtcIceServer> {

@@ -24,6 +24,7 @@ import coil.memory.MemoryCache
 import org.assistix.proto.nativeapp.data.AssistixChatRepository
 import org.assistix.proto.nativeapp.data.ProtoCachePrefetcher
 import org.assistix.proto.nativeapp.data.ProtoCacheManager
+import org.assistix.proto.nativeapp.data.ProtoMediaResolver
 import org.assistix.proto.nativeapp.data.ProtoChatBackup
 import org.assistix.proto.nativeapp.data.ProtoChatLocalPrefs
 import org.assistix.proto.nativeapp.data.ProtoConversationRepository
@@ -53,6 +54,8 @@ class ProtoApplication : Application() {
     lateinit var conversations: ProtoConversationRepository
     lateinit var assistixChat: AssistixChatRepository
     lateinit var cache: ProtoCacheManager
+    lateinit var cellsManager: org.assistix.proto.nativeapp.data.cells.ProtoCellsManager
+    lateinit var mediaResolver: ProtoMediaResolver
     lateinit var cachePrefetch: ProtoCachePrefetcher
     lateinit var network: ProtoNetworkMonitor
     lateinit var calls: ProtoCallGateway
@@ -100,13 +103,16 @@ class ProtoApplication : Application() {
                 }
             }
             cache = ProtoCacheManager(this)
-            stt = ProtoSttCoordinator(this, api, network, prefs, notifier)
-            sttQueue = ProtoSttQueue(this, applicationScope, stt, api, cache, prefs)
             val dao = ProtoDatabase.get(this).dao()
+            cellsManager =
+                org.assistix.proto.nativeapp.data.cells.ProtoCellsManager(this, api, network)
+            mediaResolver = ProtoMediaResolver(this, dao, cache, api, cellsManager)
             messages = ProtoMessageRepository(dao, api)
             conversations = ProtoConversationRepository(dao, api)
             assistixChat = AssistixChatRepository(dao)
-            cachePrefetch = ProtoCachePrefetcher(dao, cache, api, messages, conversations)
+            stt = ProtoSttCoordinator(this, api, network, prefs, notifier)
+            sttQueue = ProtoSttQueue(this, applicationScope, stt, api, cache, prefs)
+            cachePrefetch = ProtoCachePrefetcher(dao, cache, api, messages, conversations, mediaResolver)
             appUpdate = ProtoAppUpdateManager(this, api, prefs)
             val callMgr = ProtoCallManager(applicationContext, api, notifier, prefs)
             calls = callMgr
@@ -181,6 +187,17 @@ class ProtoApplication : Application() {
                     val token = session.token() ?: return@runCatching
                     if (network.checkOnline()) {
                         messages.flushOutbox(token)
+                    }
+                }
+            }
+        }
+        applicationScope.launch {
+            while (isActive) {
+                delay(120_000)
+                runCatching {
+                    val token = session.token() ?: return@runCatching
+                    if (network.checkOnline()) {
+                        cellsManager.runMaintenance(token)
                     }
                 }
             }

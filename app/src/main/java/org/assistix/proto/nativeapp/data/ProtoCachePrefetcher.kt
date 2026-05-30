@@ -14,6 +14,7 @@ class ProtoCachePrefetcher(
     private val api: ProtoApi,
     private val messages: ProtoMessageRepository,
     private val conversations: ProtoConversationRepository,
+    private val mediaResolver: ProtoMediaResolver? = null,
 ) {
     private val mutex = Mutex()
 
@@ -58,9 +59,14 @@ class ProtoCachePrefetcher(
             }
         }
 
-    private fun prefetchMessageMedia(token: String, row: MessageEntity, wifiOnly: Boolean) {
+    private suspend fun prefetchMessageMedia(token: String, row: MessageEntity, wifiOnly: Boolean) {
         if (wifiOnly) return
         val uploadId = row.mediaUploadId?.trim()?.takeIf { it.isNotEmpty() } ?: return
+        val resolver = mediaResolver
+        if (resolver != null) {
+            resolver.fetch(token, uploadId, row.mediaMime, row.mediaName, row.conversationId)
+            return
+        }
         val mime = row.mediaMime.orEmpty()
         val kind = row.mediaKind ?: mediaKindFromMime(mime, row.mediaName)
         when (kind) {

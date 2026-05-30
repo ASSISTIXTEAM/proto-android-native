@@ -75,6 +75,7 @@ fun SettingsTab(
     onOpenDevices: () -> Unit = {},
     onOpenCache: () -> Unit = {},
     onOpenDataStorage: () -> Unit = {},
+    onOpenCells: () -> Unit = {},
     onOpenOnboarding: () -> Unit = {},
     onOpenQrHub: () -> Unit = {},
 ) {
@@ -258,6 +259,13 @@ fun SettingsTab(
                         UiStrings.dataStorageHint,
                         onOpenDataStorage,
                         icon = Icons.Default.Storage,
+                    )
+                    SettingsGroupDivider()
+                    SettingsNavRow(
+                        UiStrings.cellsScreenTitle,
+                        UiStrings.cellsSettingsHint,
+                        onOpenCells,
+                        iconRes = org.assistix.proto.nativeapp.R.drawable.proto_cells_icon,
                     )
                     SettingsGroupDivider()
                     SettingsNavRow(

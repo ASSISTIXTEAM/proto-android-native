@@ -166,4 +166,10 @@ interface ProtoDao {
 
     @Query("DELETE FROM message_translations WHERE messageId = :messageId AND targetLang = :targetLang")
     suspend fun deleteTranslation(messageId: Long, targetLang: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertMediaLocal(row: MediaLocalEntity)
+
+    @Query("SELECT * FROM media_local WHERE uploadId = :uploadId LIMIT 1")
+    suspend fun mediaLocal(uploadId: String): MediaLocalEntity?
 }

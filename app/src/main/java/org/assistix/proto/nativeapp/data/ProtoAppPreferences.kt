@@ -33,6 +33,7 @@ class ProtoAppPreferences(private val context: Context) {
     private val policyAcceptedVersionKey = stringPreferencesKey("policy_accepted_version")
     private val whatsNew148Seen = booleanPreferencesKey("whats_new_148_seen")
     private val whatsNew112Seen = booleanPreferencesKey("whats_new_112_seen")
+    private val whatsNew115Seen = booleanPreferencesKey("whats_new_115_seen")
     private val linkPreviewsKey = booleanPreferencesKey("link_previews_in_chat")
     private val sendOnEnterKey = booleanPreferencesKey("send_on_enter")
     private val compactChatListKey = booleanPreferencesKey("compact_chat_list")
@@ -42,6 +43,11 @@ class ProtoAppPreferences(private val context: Context) {
     private val sttWifiHeavyKey = booleanPreferencesKey("stt_wifi_heavy_models")
     private val sttChargingOnlyKey = booleanPreferencesKey("stt_only_when_charging")
     private val sttMaxQueueKey = stringPreferencesKey("stt_max_queue")
+    private val cellsEnabledKey = booleanPreferencesKey("cells_enabled")
+
+    /** PROTO Cells is mandatory — always true (legacy key ignored). */
+    val cellsEnabled: Flow<Boolean> =
+        appPrefs.data.map { true }
 
     val onboardingComplete: Flow<Boolean> =
         appPrefs.data.map { it[onboardingDone] == true }
@@ -296,6 +302,13 @@ class ProtoAppPreferences(private val context: Context) {
 
     suspend fun setSeenWhatsNew112() {
         appPrefs.edit { it[whatsNew112Seen] = true }
+    }
+
+    suspend fun hasSeenWhatsNew115(): Boolean =
+        appPrefs.data.map { it[whatsNew115Seen] == true }.first()
+
+    suspend fun setSeenWhatsNew115() {
+        appPrefs.edit { it[whatsNew115Seen] = true }
     }
 
     val sttWifiOnlyHeavyModels: Flow<Boolean> =

@@ -68,6 +68,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.assistix.proto.nativeapp.ProtoApplication
+import org.assistix.proto.nativeapp.data.MediaFetchState
 import org.assistix.proto.nativeapp.data.ProtoApi
 import org.assistix.proto.nativeapp.data.ProtoCacheManager
 import org.assistix.proto.nativeapp.data.ProtoSttCoordinator
@@ -125,14 +126,20 @@ fun ChatMediaContent(
                 .build()
         }
     var localPhoto by remember(cleanId) { mutableStateOf<File?>(null) }
-    LaunchedEffect(cleanId, token) {
-        val f = cache.photoFile(cleanId)
-        if (f.exists() && f.length() > 0L) {
-            localPhoto = f
-            return@LaunchedEffect
+    var mediaExpired by remember(cleanId) { mutableStateOf(false) }
+    val app = remember(ctx) { ctx.applicationContext as ProtoApplication }
+    val mediaResolver = remember(app) { app.mediaResolver }
+    LaunchedEffect(cleanId, token, conversationId) {
+        mediaExpired = false
+        val result =
+            withContext(Dispatchers.IO) {
+                mediaResolver.fetch(token, cleanId, effectiveMime, cleanName, conversationId)
+            }
+        when (result.state) {
+            MediaFetchState.LOCAL, MediaFetchState.DOWNLOADED -> localPhoto = result.file
+            MediaFetchState.EXPIRED -> mediaExpired = true
+            else -> Unit
         }
-        val ok = withContext(Dispatchers.IO) { api.downloadMedia(token, cleanId, f) }
-        localPhoto = f.takeIf { ok && it.length() > 0L }
     }
     val photoModel =
         remember(localPhoto, imageRequest) {
@@ -146,16 +153,34 @@ fun ChatMediaContent(
 
     when (kind) {
         "image" -> {
-            AsyncImage(
-                model = photoModel,
-                contentDescription = null,
-                modifier =
-                    openModifier
-                        .fillMaxWidth()
-                        .heightIn(max = 320.dp)
-                        .clip(ProtoShapes.media),
-                contentScale = ContentScale.Fit,
-            )
+            if (mediaExpired && localPhoto == null) {
+                Column(openModifier.fillMaxWidth()) {
+                    Text(UiStrings.mediaRelayExpired, color = textColor.copy(0.85f), style = MaterialTheme.typography.bodySmall)
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    api.requestMediaRelay(token, cleanId, conversationId)
+                                }
+                                Toast.makeText(ctx, UiStrings.mediaRelayRequested, Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                    ) {
+                        Text(UiStrings.mediaRequestResend, color = textColor)
+                    }
+                }
+            } else {
+                AsyncImage(
+                    model = photoModel,
+                    contentDescription = null,
+                    modifier =
+                        openModifier
+                            .fillMaxWidth()
+                            .heightIn(max = 320.dp)
+                            .clip(ProtoShapes.media),
+                    contentScale = ContentScale.Fit,
+                )
+            }
         }
         "video" -> {
             var localFile by remember { mutableStateOf<File?>(null) }
@@ -192,22 +217,19 @@ fun ChatMediaContent(
                                 }
                                 scope.launch {
                                     loading = true
-                                    val f = cache.videoFile(cleanId)
-                                    val legacy = File(ctx.cacheDir, "proto_vid_$cleanId.mp4")
-                                    if ((!f.exists() || f.length() == 0L) && legacy.exists() && legacy.length() > 0L) {
-                                        legacy.copyTo(f, overwrite = true)
-                                    }
-                                    if (!f.exists() || f.length() == 0L) {
-                                        val ok = withContext(Dispatchers.IO) { api.downloadMedia(token, cleanId, f) }
-                                        if (!ok) {
-                                            loading = false
-                                            onDownload(cleanId, cleanName ?: "video.mp4")
-                                            return@launch
+                                    val app = ctx.applicationContext as ProtoApplication
+                                    val result =
+                                        withContext(Dispatchers.IO) {
+                                            app.mediaResolver.fetch(token, cleanId, effectiveMime, cleanName, conversationId)
                                         }
+                                    if (result.file != null) {
+                                        localFile = result.file
+                                        loading = false
+                                        showPlayer = true
+                                        return@launch
                                     }
-                                    localFile = f
                                     loading = false
-                                    showPlayer = true
+                                    onDownload(cleanId, cleanName ?: "video.mp4")
                                 }
                             },
                         ) {
@@ -380,11 +402,19 @@ private fun VoiceMessagePlayer(
             legacy.copyTo(audioFile, overwrite = true)
             return true
         }
-        val ok = withContext(Dispatchers.IO) { api.downloadMedia(token, uploadId, audioFile) }
-        if (ok) {
+        val app = ctx.applicationContext as ProtoApplication
+        val result =
+            withContext(Dispatchers.IO) {
+                app.mediaResolver.fetch(token, uploadId, mime, "audio.$ext", conversationId)
+            }
+        if (result.file != null) {
+            if (result.file.absolutePath != audioFile.absolutePath) {
+                runCatching { result.file.copyTo(audioFile, overwrite = true) }
+            }
             waveform = ProtoAudioWaveform.load(ctx, audioFile)
+            return audioFile.exists() && audioFile.length() > 0L
         }
-        return ok
+        return false
     }
 
     LaunchedEffect(uploadId, messageId, initialVoiceTranscript, sttQueue) {

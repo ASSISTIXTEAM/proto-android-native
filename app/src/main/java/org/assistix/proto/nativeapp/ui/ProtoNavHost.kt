@@ -88,6 +88,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import java.io.File
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -259,6 +260,48 @@ fun ProtoNavHost(
     val realtime = remember(ctx, sessionUserId) {
         ProtoRealtimeHub(context = ctx, userIdProvider = { sessionUserId }) { raw ->
             ProtoUnifiedRealtime.dispatch(raw, realtimeHandlers)
+            when (raw.optString("type")) {
+                "media_relay_request" -> {
+                    val data = raw.optJSONObject("data") ?: return@ProtoRealtimeHub
+                    val uploadId = data.optString("upload_id", "").trim()
+                    val cid = data.optInt("conversation_id", 0)
+                    val requester = data.optInt("requester_id", 0)
+                    if (uploadId.isBlank() || cid <= 0 || requester == sessionUserId) return@ProtoRealtimeHub
+                    app.applicationScope.launch(Dispatchers.IO) {
+                        val t = session.token() ?: return@launch
+                        app.mediaResolver.relayIfLocal(t, uploadId, cid)
+                    }
+                    return@ProtoRealtimeHub
+                }
+                "media_relay_ready" -> {
+                    ProtoEventHub.bump()
+                    return@ProtoRealtimeHub
+                }
+                "cell_blob_published", "cell_repair_request" -> {
+                    val data = raw.optJSONObject("data") ?: return@ProtoRealtimeHub
+                    app.applicationScope.launch(Dispatchers.IO) {
+                        val t = session.token() ?: return@launch
+                        app.cellsManager.syncMyHolds(t)
+                        if (raw.optString("type") == "cell_repair_request") {
+                            val blobId = data.optString("blob_id", "")
+                            val cid = data.optInt("conversation_id", 0)
+                            val missing = data.optJSONArray("missing_indices") ?: return@launch
+                            val row = app.messages.findLocalMedia(blobId) ?: return@launch
+                            val indices = (0 until missing.length()).mapNotNull { missing.optInt(it).takeIf { i -> i >= 0 } }
+                            app.cellsManager.repairFromLocal(
+                                t,
+                                blobId,
+                                cid,
+                                File(row.localPath),
+                                row.mime,
+                                indices,
+                            )
+                        }
+                    }
+                    ProtoEventHub.bump()
+                    return@ProtoRealtimeHub
+                }
+            }
             if (raw.optString("type") != "message") return@ProtoRealtimeHub
             if (ProtoRealtimeCatchUp.active) return@ProtoRealtimeHub
             val data = raw.optJSONObject("data") ?: return@ProtoRealtimeHub
@@ -613,20 +656,20 @@ fun ProtoNavHost(
                 val reduceMotion by app.prefs.reduceMotionEnabled.collectAsState(initial = false)
                 val textScale by app.prefs.textSizeScale.collectAsState(initial = 1f)
                 val languageCode by app.prefs.languageCodeFlow.collectAsState(initial = "en")
-                var showWhatsNew112 by remember { mutableStateOf(false) }
+                var showWhatsNew115 by remember { mutableStateOf(false) }
                 LaunchedEffect(authToken) {
-                    if (!authToken.isNullOrBlank() && !app.prefs.hasSeenWhatsNew112()) {
-                        showWhatsNew112 = true
+                    if (!authToken.isNullOrBlank() && !app.prefs.hasSeenWhatsNew115()) {
+                        showWhatsNew115 = true
                     }
                 }
-                if (showWhatsNew112) {
+                if (showWhatsNew115) {
                     ProtoWhatsNewDialog(
-                        title = UiStrings.whatsNew112Title,
-                        bullets = UiStrings.whatsNew112Bullets,
+                        title = UiStrings.whatsNew115Title,
+                        bullets = UiStrings.whatsNew115Bullets,
                         onDismiss = {
                             scope.launch {
-                                app.prefs.setSeenWhatsNew112()
-                                showWhatsNew112 = false
+                                app.prefs.setSeenWhatsNew115()
+                                showWhatsNew115 = false
                             }
                         },
                     )
@@ -808,6 +851,7 @@ fun ProtoNavHost(
                                     onOpenDevices = { nav.navigate("devices") },
                                     onOpenCache = { nav.navigate("cache_settings") },
                                     onOpenDataStorage = { nav.navigate("data_storage") },
+                                    onOpenCells = { nav.navigate("proto_cells") },
                                     onOpenOnboarding = openOnboarding,
                                     onOpenQrHub = { nav.navigate("qr_hub") },
                                     onLogout = { performSignOut() },
@@ -1079,6 +1123,9 @@ fun ProtoNavHost(
             }
             composable("data_storage") {
                 ProtoDataStorageScreen(onBack = { nav.popBackStack() })
+            }
+            composable("proto_cells") {
+                ProtoCellsScreen(onBack = { nav.popBackStack() })
             }
             composable("devices_scan") {
                 LinkQrScannerScreen(
@@ -1570,6 +1617,9 @@ private fun ChatListScreen(
                 if (prepared.first.length() > ProtoMediaCompressor.MAX_UPLOAD_BYTES) return null
                 val uploadId = withContext(Dispatchers.IO) { api.uploadFile(t, prepared.first, prepared.second) }
                     ?: return null
+                withContext(Dispatchers.IO) {
+                    app.mediaResolver.persistOutgoing(uploadId, prepared.first, prepared.second, name)
+                }
                 return AlbumItem(uploadId, prepared.second, name)
             }
 

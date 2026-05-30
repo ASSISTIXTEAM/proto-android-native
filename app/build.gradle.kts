@@ -30,8 +30,8 @@ android {
         applicationId = "org.assistix.proto"
         minSdk = 26
         targetSdk = 35
-        versionCode = 103
-        versionName = "1.1.2"
+        versionCode = 107
+        versionName = "1.1.5"
 
         val secrets = loadSecrets()
         buildConfigField("String", "API_ORIGIN", "\"${secret(secrets, "API_ORIGIN", "https://example.com")}\"")
