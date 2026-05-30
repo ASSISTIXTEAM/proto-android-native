@@ -12,7 +12,7 @@
 [![Stars](https://img.shields.io/github/stars/ASSISTIXTEAM/proto-android-native?style=for-the-badge&logo=github&label=Stars)](https://github.com/ASSISTIXTEAM/proto-android-native/stargazers)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge)](CONTRIBUTING.md)
 
-[proto.su](https://proto.su) · [Issues](https://github.com/ASSISTIXTEAM/proto-android-native/issues) · [Contributing](CONTRIBUTING.md) · [License](LICENSE)
+[proto.su](https://proto.su) · [Releases](https://github.com/ASSISTIXTEAM/proto-android-native/releases) · [Changelog](CHANGELOG.md) · [Issues](https://github.com/ASSISTIXTEAM/proto-android-native/issues) · [Contributing](CONTRIBUTING.md) · [License](LICENSE)
 
 *Публичный релиз **1.1.1** · client-only source*
 

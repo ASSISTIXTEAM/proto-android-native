@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest an improvement for PROTO Android
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature ideas for the **official PROTO Android app** are welcome.
+        Out of scope: separate messenger products, backend server features in this repo.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What user problem does this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Will you contribute?
+      options:
+        - label: I am willing to open a PR if maintainers agree with the approach
+        - label: I understand this may be declined or scheduled for a later release

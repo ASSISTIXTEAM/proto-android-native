@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: PROTO website
+    url: https://proto.su
+    about: Official app, downloads, and product info
+  - name: Security report
+    url: https://github.com/ASSISTIXTEAM/proto-android-native/blob/main/SECURITY.md
+    about: Report client security issues privately
