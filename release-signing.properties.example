@@ -1,5 +1,5 @@
 # Copy to release-signing.properties and fill in (do not commit release-signing.properties).
-storeFile=keystore/proto-rustore-release.jks
+storeFile=keystore/release.keystore
 storePassword=YOUR_STORE_PASSWORD
-keyAlias=proto-upload
+keyAlias=proto
 keyPassword=YOUR_KEY_PASSWORD
