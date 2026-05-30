@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PROTO</string>
+    <string name="widget_unread_label">PROTO · Быстрый доступ</string>
+    <string name="widget_unread_desc">Логотип PROTO и счётчик непрочитанных — откройте мессенджер в один тап</string>
+    <string name="widget_chats_compact_label">PROTO · Сейчас</string>
+    <string name="widget_chats_compact_desc">Свежие диалоги с превью — идеально для 2×2</string>
+    <string name="widget_chats_list_label">PROTO · Входящие</string>
+    <string name="widget_chats_list_desc">Список чатов с превью и временем — главный виджет для переписки</string>
+    <string name="widget_chats_wide_label">PROTO · Панель</string>
+    <string name="widget_chats_wide_desc">Сводка непрочитанных и до 7 чатов — полный обзор с рабочего стола</string>
+    <string name="widget_brand_tagline">Messenger</string>
+    <string name="widget_open_proto">Открыть PROTO</string>
+    <string name="widget_unread_stat">непрочитанных</string>
+    <string name="widget_chats_active">активных чатов</string>
+    <string name="widget_all_caught_up">Всё прочитано ✓</string>
+    <string name="widget_login_hint">Войдите в PROTO</string>
+    <string name="widget_no_chats">Нет чатов</string>
+    <string name="widget_all_read">Всё прочитано</string>
+    <string name="widget_refresh">Обновить</string>
+    <string name="widget_open_app">Открыть PROTO</string>
+    <string name="widget_ai_brief_label">PROTO · AI-сводка</string>
+    <string name="widget_ai_brief_desc">ИИ кратко расскажет, что вам написали — без открытия чатов</string>
+    <string name="share_into_proto">Поделиться в PROTO</string>
+    <string name="widget_quick_chat_label">PROTO · Быстрый чат</string>
+    <string name="widget_quick_chat_desc">3 частых контакта — открыть чат в один тап</string>
+</resources>

@@ -1,0 +1,62 @@
+package org.assistix.proto.nativeapp.ui
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun ProtoOfflineBanner(
+    offline: Boolean,
+    queuedCount: Int = 0,
+    modifier: Modifier = Modifier,
+) {
+    if (!offline && queuedCount <= 0) return
+    val bg =
+        if (offline) {
+            MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.92f)
+        } else {
+            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.92f)
+        }
+    val fg =
+        if (offline) {
+            MaterialTheme.colorScheme.onTertiaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSecondaryContainer
+        }
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(bg)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+    ) {
+        if (offline) {
+            Text(
+                UiStrings.offlineShowingCache,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
+                color = fg,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        if (queuedCount > 0) {
+            Text(
+                if (offline) UiStrings.offlineQueuedFmt(queuedCount) else UiStrings.onlineQueuedFmt(queuedCount),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = if (offline) FontWeight.Normal else FontWeight.Medium,
+                color = fg.copy(alpha = 0.92f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(top = if (offline) 2.dp else 0.dp),
+            )
+        }
+    }
+}

@@ -1,0 +1,97 @@
+PROTO Android Source Access License (PASAL) v1.0
+Copyright (c) 2026 ASSISTIX TEAM. All rights reserved.
+
+This license applies to the repository "proto-android-native" and all source code,
+assets, and documentation contained herein (the "Software").
+
+The Software is the official Android client source code for the PROTO messenger
+product. It is published so that contributors can help improve PROTO — not to
+enable unrelated products or competing messengers.
+
+----------------------------------------------------------------------
+1. PERMITTED USES
+----------------------------------------------------------------------
+
+You may:
+
+  (a) View, read, and study the Software for any personal or educational purpose.
+
+  (b) Run and build the Software locally for development, testing, debugging,
+      and evaluation in connection with PROTO.
+
+  (c) Modify the Software solely to propose improvements to the official PROTO
+      Android application maintained by ASSISTIX TEAM.
+
+  (d) Submit your modifications via a fork and pull request (or equivalent
+      contribution workflow) to this repository, so maintainers can review them.
+
+----------------------------------------------------------------------
+2. CONTRIBUTION MODEL
+----------------------------------------------------------------------
+
+Community changes are welcome only when they aim to improve PROTO itself.
+
+  - Create a branch or fork, make focused changes, and open a pull request.
+  - ASSISTIX TEAM reviewers decide whether a contribution is accepted.
+  - Accepted changes may be merged into the official PROTO Android client.
+  - Submitting a pull request does not grant ownership of the PROTO brand,
+    codebase, or trademarks to the contributor.
+
+By submitting a contribution, you grant ASSISTIX TEAM a perpetual, worldwide,
+non-exclusive, royalty-free license to use, modify, merge, and distribute your
+contribution as part of PROTO and this repository.
+
+----------------------------------------------------------------------
+3. PROHIBITED USES
+----------------------------------------------------------------------
+
+Without prior written permission from ASSISTIX TEAM, you may NOT:
+
+  (a) Use the Software, or any derivative work, as the basis for a separate
+      messenger, chat application, or communication product that is marketed
+      or distributed as a competitor or substitute for PROTO.
+
+  (b) Remove or alter copyright notices, license terms, or PROTO branding
+      required by the maintainers.
+
+  (c) Redistribute modified binaries or source as an unofficial "PROTO" build
+      for public download, app store publication, or commercial distribution,
+      except as explicitly authorized by ASSISTIX TEAM.
+
+  (d) Use the ASSISTIX or PROTO names, logos, or trademarks to imply official
+      endorsement of a fork or third-party build.
+
+  (e) Sublicense the Software under terms that are more permissive than this
+      license or that conflict with the purpose stated above.
+
+Study and internal experimentation are allowed; launching a new messenger product
+based on this codebase is not.
+
+----------------------------------------------------------------------
+4. NO WARRANTY
+----------------------------------------------------------------------
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL ASSISTIX TEAM
+BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM USE OF THE
+SOFTWARE.
+
+----------------------------------------------------------------------
+5. TERMINATION
+----------------------------------------------------------------------
+
+If you violate this license, your rights under it terminate automatically.
+ASSISTIX TEAM may also revoke access to this repository for repeated or
+serious violations.
+
+----------------------------------------------------------------------
+6. QUESTIONS
+----------------------------------------------------------------------
+
+For licensing exceptions, partnership inquiries, or clarification:
+team@proto.su
+
+ASSISTIX TEAM reserves the right to update this license for future releases.
+The version in effect at the time you obtained the Software applies to your copy
+unless you agree to a newer version when updating from this repository.

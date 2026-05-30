@@ -1,0 +1,5 @@
+# Copy to release-signing.properties and fill in (do not commit release-signing.properties).
+storeFile=keystore/release.keystore
+storePassword=YOUR_STORE_PASSWORD
+keyAlias=proto
+keyPassword=YOUR_KEY_PASSWORD
