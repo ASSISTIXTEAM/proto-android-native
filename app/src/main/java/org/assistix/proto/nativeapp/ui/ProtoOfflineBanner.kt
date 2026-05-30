@@ -19,9 +19,10 @@ fun ProtoOfflineBanner(
     queuedCount: Int = 0,
     cellsPending: Int = 0,
     cellsRepairing: Int = 0,
+    showCellsStatus: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    if (!offline && queuedCount <= 0 && cellsPending <= 0 && cellsRepairing <= 0) return
+    if (!offline && queuedCount <= 0 && (!showCellsStatus || (cellsPending <= 0 && cellsRepairing <= 0))) return
     val bg =
         if (offline) {
             MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.92f)
@@ -68,7 +69,7 @@ fun ProtoOfflineBanner(
                 modifier = Modifier.fillMaxWidth().padding(top = if (offline) 4.dp else 0.dp),
             )
         }
-        if (cellsRepairing > 0) {
+        if (showCellsStatus && cellsRepairing > 0) {
             Text(
                 UiStrings.cellsRepairBadge,
                 style = MaterialTheme.typography.labelSmall,
@@ -81,7 +82,7 @@ fun ProtoOfflineBanner(
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                 color = ProtoOrange,
             )
-        } else if (cellsPending > 0) {
+        } else if (showCellsStatus && cellsPending > 0) {
             Text(
                 UiStrings.cellsPendingHoldsFmt(cellsPending),
                 style = MaterialTheme.typography.labelSmall,

@@ -143,6 +143,14 @@ class ProtoCacheManager(context: Context) {
             ProtoCacheCategory.entries.filter { it != ProtoCacheCategory.CHATS }.forEach { clear(it) }
         }
 
+    private fun deleteDirContents(dir: File) {
+        if (ProtoPersistentStorage.isVaultPath(appCtx, dir)) return
+        dir.listFiles()?.forEach { child ->
+            if (ProtoPersistentStorage.isVaultPath(appCtx, child)) return@forEach
+            child.deleteRecursively()
+        }
+    }
+
     companion object {
         fun formatBytes(bytes: Long): String {
             if (bytes < 1024) return "$bytes B"
@@ -157,10 +165,6 @@ class ProtoCacheManager(context: Context) {
 
         private fun dirSize(dir: File): Long =
             dir.walkTopDown().filter { it.isFile }.sumOf { it.length() }
-
-        private fun deleteDirContents(dir: File) {
-            dir.listFiles()?.forEach { it.deleteRecursively() }
-        }
     }
 
     private fun coilDiskBytes(): Long {

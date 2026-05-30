@@ -253,6 +253,10 @@ fun ProtoNavHost(
                 },
                 onWebrtc = { cid ->
                     calls.prioritizeIncomingPoll(cid)
+                    app.applicationScope.launch(Dispatchers.IO) {
+                        val t = session.token() ?: return@launch
+                        app.cellsManager.pollP2pServe(t, cid)
+                    }
                 },
                 onPin = { _, _ -> ProtoEventHub.bump() },
             )
@@ -2007,24 +2011,6 @@ private fun ChatListScreen(
     }
 
     val groupChats = chats.filter { it.kind == "group" }
-    var queuedOutbox by remember { mutableIntStateOf(0) }
-    val cellsStats by app.cellsManager.stats.collectAsState()
-    val cellsRepair by app.cellsManager.repairActive.collectAsState()
-    LaunchedEffect(online) {
-        while (isActive) {
-            queuedOutbox = withContext(Dispatchers.IO) { app.messages.pendingOutboxCount() }
-            delay(2500)
-        }
-    }
-    LaunchedEffect(online, authToken) {
-        val t = authToken ?: return@LaunchedEffect
-        while (isActive) {
-            if (online) {
-                runCatching { app.cellsManager.refreshStats(t) }
-            }
-            delay(60_000)
-        }
-    }
     val recentFabChats =
         remember(chats, recentOpenIds) {
             val byId = chats.associateBy { it.id }
@@ -2041,13 +2027,7 @@ private fun ChatListScreen(
         }
 
     Column(Modifier.fillMaxSize()) {
-        ProtoGlobalProgressBar()
-        ProtoOfflineBanner(
-            offline = !online,
-            queuedCount = queuedOutbox,
-            cellsPending = cellsStats.holdsPending,
-            cellsRepairing = cellsRepair,
-        )
+        ProtoGlobalProgressBar(hideCellsJobs = true)
         if (forwardActive && forwardMsg != null) {
             ForwardModeBar(
                 messageCount = ProtoForwardState.messages.size,

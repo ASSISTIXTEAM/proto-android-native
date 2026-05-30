@@ -523,6 +523,9 @@ object UiStrings {
     val dataStorageStt get() = bundle.dataStorageStt
     val dataStoragePrefs get() = bundle.dataStoragePrefs
     val dataStorageBackups get() = bundle.dataStorageBackups
+    val dataStorageCells get() = bundle.dataStorageCells
+    val dataStorageMedia get() = bundle.dataStorageMedia
+    val dataStorageVaultHint get() = bundle.dataStorageVaultHint
     val dataStoragePermissionHint get() = bundle.dataStoragePermissionHint
     val dataStorageGrantAccess get() = bundle.dataStorageGrantAccess
     val dataStorageOpenFolder get() = bundle.dataStorageOpenFolder
@@ -773,6 +776,7 @@ object UiStrings {
     val offlineShowingCache get() = bundle.offlineShowingCache
     val cacheStorageTitle get() = bundle.cacheStorageTitle
     val cacheAvatarsHint get() = bundle.cacheAvatarsHint
+    val cacheVaultHint get() = bundle.cacheVaultHint
     val cacheCategoryChats get() = bundle.cacheCategoryChats
     val cacheCategoryPhotos get() = bundle.cacheCategoryPhotos
     val cacheCategoryVideos get() = bundle.cacheCategoryVideos
@@ -846,6 +850,8 @@ object UiStrings {
     val crashReportHint get() = bundle.crashReportHint
     val offlineCellsPendingFmt get() = bundle.offlineCellsPendingFmt
     val offlineSendWhenOnline get() = bundle.offlineSendWhenOnline
+    fun composerOfflineQueuedFmt(count: Int): String = String.format(bundle.composerOfflineQueuedFmt, count)
+    fun composerQueuedFmt(count: Int): String = String.format(bundle.composerQueuedFmt, count)
     val whatsNewCurrentTitle get() = bundle.whatsNewCurrentTitle
     val whatsNewCurrentBullets get() = bundle.whatsNewCurrentBullets
     val settingsHealthCheck get() = bundle.settingsHealthCheck
@@ -854,6 +860,10 @@ object UiStrings {
         String.format(bundle.cellsStorageFmt, formatBytes(used), formatBytes(quota))
 
     fun cellsHelpedFmt(chats: Int): String = String.format(bundle.cellsHelpedFmt, chats)
+    fun cellsLocalShardsFmt(shards: Int, bytes: String): String = String.format(bundle.cellsLocalShardsFmt, shards, bytes)
+    fun cellsLastSyncFmt(whenStr: String): String = String.format(bundle.cellsLastSyncFmt, whenStr)
+    val cellsVaultTitle get() = bundle.cellsVaultTitle
+    val cellsVaultBody get() = bundle.cellsVaultBody
 
     fun cellsPendingHoldsFmt(count: Int): String = String.format(bundle.cellsPendingHoldsFmt, count)
 

@@ -57,6 +57,7 @@ flowchart LR
 2. **Хранение** — каждый держатель хранит только **gzip-сжатый фрагмент** (`PCGZ` + gzip). Без ключа из каталога открыть файл нельзя.
 3. **Сборка** — при просмотре клиент собирает все 7 шардов (локально → relay → repair), проверяет хеши, расшифровывает AES-GCM.
 4. **Поддержка** — фоновый цикл каждые **2 минуты** подтягивает назначенные шарды, шлёт heartbeat и ack.
+5. **P2P (1.1.8+)** — если участники чата онлайн, шарды передаются **напрямую через WebRTC**; HTTP relay на сервере — только fallback.
 
 ---
 
@@ -65,7 +66,7 @@ flowchart LR
 | Параметр | Значение | Код |
 |----------|----------|-----|
 | Шифрование | AES-256-GCM, IV 12 байт | `ProtoCellsCrypto` |
-| Шардов на blob | **8** (7 data + 1 XOR parity, **Cells-P**) · legacy 7 mirror |
+| Шардов на blob | **Adaptive Cells-P:** **3+1** (< 48 KB cipher) or **7+1** (large) · legacy 7 mirror |
 | Репликация | Data ×3, parity ×2 (назначает сервер) |
 | Мин. размер медиа | **8 KB** | `ProtoCellsConfig.MIN_BLOB_BYTES` |
 | Квота волонтёра | **768 MB** по умолчанию | `ProtoCellsConfig.DEFAULT_QUOTA_BYTES` |
@@ -177,4 +178,4 @@ PROTO Cells is **mandatory mutual encrypted media hosting**. Files ≥ 8 KB are 
 
 ---
 
-*PROTO Android **1.1.6** · [proto.su](https://proto.su)*
+*PROTO Android **1.1.8** · [proto.su](https://proto.su)*

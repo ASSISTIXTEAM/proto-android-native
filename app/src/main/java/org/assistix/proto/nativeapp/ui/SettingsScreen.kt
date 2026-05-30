@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.assistix.proto.nativeapp.R
 import org.assistix.proto.nativeapp.data.ProtoAppPreferences
 import org.assistix.proto.nativeapp.data.ProtoSessionStore
 import org.assistix.proto.nativeapp.data.ProtoThemeMode
@@ -113,16 +114,10 @@ fun SettingsTab(
     val scope = rememberCoroutineScope()
     val ctx = androidx.compose.ui.platform.LocalContext.current
     val app = ctx.applicationContext as org.assistix.proto.nativeapp.ProtoApplication
-    val cellsStats by app.cellsManager.stats.collectAsState()
-    val cellsRepair by app.cellsManager.repairActive.collectAsState()
 
     LaunchedEffect(textScale) { sliderScale = textScale }
     LaunchedEffect(Unit) {
         updateManager.refresh(silent = true)
-        val t = app.session.token()
-        if (!t.isNullOrBlank()) {
-            runCatching { app.cellsManager.refreshStats(t) }
-        }
     }
     LaunchedEffect(reduceMotion) {
         if (!reduceMotion) {
@@ -277,14 +272,9 @@ fun SettingsTab(
                     SettingsGroupDivider()
                     SettingsNavRow(
                         UiStrings.cellsScreenTitle,
-                        when {
-                            cellsRepair > 0 -> UiStrings.cellsRepairBadge
-                            cellsStats.holdsPending > 0 -> UiStrings.cellsPendingHoldsFmt(cellsStats.holdsPending)
-                            cellsStats.tier != "member" -> UiStrings.cellsHelpedFmt(cellsStats.conversationsHelped)
-                            else -> UiStrings.cellsSettingsHint
-                        },
+                        UiStrings.cellsSettingsHint,
                         onOpenCells,
-                        icon = Icons.Default.Hive,
+                        iconRes = R.drawable.proto_cells_icon,
                     )
                     SettingsGroupDivider()
                     SettingsNavRow(

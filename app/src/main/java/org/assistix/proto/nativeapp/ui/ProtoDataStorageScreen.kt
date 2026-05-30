@@ -69,10 +69,13 @@ fun ProtoDataStorageScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(UiStrings.dataStorageHint, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(UiStrings.dataStorageVaultHint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             stats?.let { s ->
                 StorageRow(UiStrings.dataStorageTotal, ProtoStorageStats.formatBytes(s.totalBytes))
                 StorageRow(UiStrings.dataStoragePath, s.rootPath)
                 StorageRow(UiStrings.dataStorageDb, ProtoStorageStats.formatBytes(s.databaseBytes))
+                StorageRow(UiStrings.dataStorageCells, ProtoStorageStats.formatBytes(s.cellsBytes))
+                StorageRow(UiStrings.dataStorageMedia, ProtoStorageStats.formatBytes(s.mediaBytes))
                 StorageRow(UiStrings.dataStorageCache, ProtoStorageStats.formatBytes(s.cacheBytes))
                 StorageRow(UiStrings.dataStorageStt, ProtoStorageStats.formatBytes(s.sttBytes))
                 StorageRow(UiStrings.dataStoragePrefs, ProtoStorageStats.formatBytes(s.prefsBytes))

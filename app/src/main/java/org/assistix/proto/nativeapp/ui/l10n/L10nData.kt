@@ -135,6 +135,10 @@ object L10nData {
             dataStorageStt = "Voice models"
             dataStoragePrefs = "Settings"
             dataStorageBackups = "Backups"
+            dataStorageCells = "PROTO Cells (encrypted)"
+            dataStorageMedia = "Encrypted media"
+            dataStorageVaultHint =
+                "Cells shards and the encrypted vault are never removed when you clear cache. With full file access, Documents/PROTO survives «clear app data»."
             dataStoragePermissionHint = "Grant access to all files to open the folder on Android 11+."
             dataStorageGrantAccess = "Grant access"
             dataStorageOpenFolder = "Open folder"
@@ -723,6 +727,7 @@ object L10nData {
             cacheStorageTitle = "Cache & storage"
             cacheTotalFmt = "Total cache: %s"
             cacheAvatarsHint = "Profile photos are stored separately in compressed form and are not cleared with media cache."
+            cacheVaultHint = "PROTO Cells encrypted shards and the vault are never cleared here — only disposable media cache."
             cacheCategoryChats = "Chats & messages"
             cacheCategoryPhotos = "Photos"
             cacheCategoryVideos = "Videos"
@@ -732,7 +737,7 @@ object L10nData {
             cacheClearCategory = "Clear"
             cacheClearAll = "Clear all cache"
             cacheClearAllTitle = "Clear all cache?"
-            cacheClearAllBody = "Messages, media and downloads will be removed. Profile photos stay compressed on device."
+            cacheClearAllBody = "Messages and downloaded media cache will be removed. Profile photos, PROTO Cells vault and encrypted storage stay on device."
             cacheClearConfirmTitle = "Clear this category?"
             cacheClearConfirmBodyFmt = "Remove cached %s?"
             cacheClearAction = "Clear"
@@ -829,7 +834,7 @@ object L10nData {
                 "Each file is AES-256 encrypted before it leaves your phone. Holders only store random shards — nobody can open your media without the key in the chat catalog."
             cellsHowTitle = "Smart & compact"
             cellsHowBody =
-                "Files split into 7 data stripes + 1 XOR parity shard (Cells-P). One missing data shard recovers automatically. Shards are gzip-compressed — less storage than triple mirror."
+                "Small files: 3 data + 1 XOR parity. Large: 7+1 (Cells-P). P2P between chat members first — server relay only as fallback. Gzip-compressed shards."
             cellsBulletsTitle = "Why it's awesome"
             cellsBullets = listOf(
                 "No one reads your files — only encrypted fragments",
@@ -843,6 +848,11 @@ object L10nData {
             cellsTierNode = "Hive node"
             cellsStorageFmt = "%s / %s stored"
             cellsHelpedFmt = "Helped %d chats"
+            cellsLocalShardsFmt = "%d local shards · %s on device"
+            cellsLastSyncFmt = "Last sync: %s"
+            cellsVaultTitle = "Protected vault"
+            cellsVaultBody =
+                "Encrypted shards live in Documents/PROTO/cells. Cache wipe and «clear data» do not delete them when storage access is granted."
             cellsRepairBadge = "Network repairing media"
             cellsRepairNotifyTitle = "PROTO Cells"
             cellsRepairNotifyBody = "The network is repairing encrypted media shards"
@@ -867,14 +877,14 @@ object L10nData {
             transferProgressMulti = "%d transfers in progress"
             offlineCellsPendingFmt = "Media syncing via Cells"
             offlineSendWhenOnline = "Messages send when you're back online"
-            whatsNewCurrentTitle = "What's new in PROTO 1.1.6"
+            composerOfflineQueuedFmt = "%d messages will send when you're back online"
+            composerQueuedFmt = "%d messages sending…"
+            whatsNewCurrentTitle = "What's new in PROTO 1.1.8"
             whatsNewCurrentBullets = listOf(
-                "Cells-P RAID: 7 data stripes + XOR parity — faster, less storage, 1 missing shard auto-recovery",
-                "Cells stats & node tier — see your contribution in Settings",
-                "Repair badge + notification when the network fixes media",
-                "Global transfer progress bar for uploads, downloads & Cells",
-                "Offline banner: queued messages & Cells sync status",
-                "Health check screen, optional crash reports, smarter Whisper on weak phones",
+                "Cells P2P: shards transfer directly between chat members via WebRTC",
+                "Server relay is fallback only — faster downloads, less server load",
+                "Adaptive striping: small files 3+1 parity, large files 7+1",
+                "Offline hint moved to composer only — cleaner chat list",
             )
             settingsHealthCheck = "Health check"
             whatsNewTitle = "What's new in PROTO 1.0.48"
@@ -1159,6 +1169,10 @@ object L10nData {
             dataStorageStt = "Модели голоса"
             dataStoragePrefs = "Настройки"
             dataStorageBackups = "Резервные копии"
+            dataStorageCells = "PROTO Cells (шифр.)"
+            dataStorageMedia = "Зашифрованное медиа"
+            dataStorageVaultHint =
+                "Шарды Cells и зашифрованное хранилище не удаляются при очистке кэша. С полным доступом к файлам Documents/PROTO переживает «очистку данных»."
             dataStoragePermissionHint = "На Android 11+ нужен доступ ко всем файлам, чтобы открыть папку."
             dataStorageGrantAccess = "Выдать доступ"
             dataStorageOpenFolder = "Открыть папку"
@@ -1748,6 +1762,7 @@ object L10nData {
             cacheStorageTitle = "Кэш и память"
             cacheTotalFmt = "Всего в кэше: %s"
             cacheAvatarsHint = "Аватары хранятся отдельно в сжатом виде и не удаляются при очистке медиа."
+            cacheVaultHint = "Зашифрованные шарды PROTO Cells и vault не очищаются здесь — только одноразовый кэш медиа."
             cacheCategoryChats = "Чаты и сообщения"
             cacheCategoryPhotos = "Фото"
             cacheCategoryVideos = "Видео"
@@ -1757,7 +1772,7 @@ object L10nData {
             cacheClearCategory = "Очистить"
             cacheClearAll = "Очистить весь кэш"
             cacheClearAllTitle = "Очистить весь кэш?"
-            cacheClearAllBody = "Сообщения, медиа и загрузки будут удалены. Аватары останутся на устройстве."
+            cacheClearAllBody = "Сообщения и кэш медиа будут удалены. Аватары, vault PROTO Cells и зашифрованное хранилище останутся на устройстве."
             cacheClearConfirmTitle = "Очистить категорию?"
             cacheClearConfirmBodyFmt = "Удалить кэш: %s?"
             cacheClearAction = "Очистить"
@@ -1854,7 +1869,7 @@ object L10nData {
                 "Каждый файл шифруется AES-256 до отправки с телефона. У держателей только фрагменты — открыть медиа без ключа из каталога чата невозможно."
             cellsHowTitle = "Умно и компактно"
             cellsHowBody =
-                "Файл делится на 7 data-полос + 1 XOR parity (Cells-P). Один пропавший data-шард восстанавливается автоматически. Gzip-сжатие — меньше места, чем тройное зеркало."
+                "Малые файлы: 3 data + XOR parity. Крупные: 7+1 (Cells-P). Сначала P2P между участниками чата — relay на сервере только запасной. Gzip-сжатие."
             cellsBulletsTitle = "Почему это круто"
             cellsBullets = listOf(
                 "Никто не читает файлы — только зашифрованные фрагменты",
@@ -1868,6 +1883,11 @@ object L10nData {
             cellsTierNode = "Узел сети"
             cellsStorageFmt = "%s / %s в сети"
             cellsHelpedFmt = "Помог %d чатам"
+            cellsLocalShardsFmt = "%d локальных шардов · %s на устройстве"
+            cellsLastSyncFmt = "Синхронизация: %s"
+            cellsVaultTitle = "Защищённый vault"
+            cellsVaultBody =
+                "Шифрованные шарды в Documents/PROTO/cells. Очистка кэша и «данных приложения» их не трогает при доступе к хранилищу."
             cellsRepairBadge = "Сеть чинит медиа"
             cellsRepairNotifyTitle = "PROTO Cells"
             cellsRepairNotifyBody = "Сеть восстанавливает зашифрованные шарды медиа"
@@ -1892,14 +1912,14 @@ object L10nData {
             transferProgressMulti = "%d передач в процессе"
             offlineCellsPendingFmt = "Медиа синхронизируется через Cells"
             offlineSendWhenOnline = "Сообщения отправятся при появлении сети"
-            whatsNewCurrentTitle = "Новое в PROTO 1.1.6"
+            composerOfflineQueuedFmt = "%d сообщ. отправятся при появлении сети"
+            composerQueuedFmt = "%d сообщ. в очереди…"
+            whatsNewCurrentTitle = "Новое в PROTO 1.1.8"
             whatsNewCurrentBullets = listOf(
-                "Cells-P RAID: 7 data + XOR parity — быстрее, меньше места, автовосстановление 1 шарда",
-                "Статистика Cells и tier узла — вклад виден в настройках",
-                "Бейдж и уведомление, когда сеть чинит медиа",
-                "Общий прогресс загрузок, скачиваний и Cells",
-                "Офлайн-баннер: очередь сообщений и статус Cells",
-                "Health check, опциональные crash-отчёты, умный Whisper на слабых телефонах",
+                "Cells P2P: шарды напрямую между участниками чата через WebRTC",
+                "Relay на сервере — только запасной путь, быстрее и меньше нагрузка",
+                "Adaptive striping: малые файлы 3+1, крупные 7+1",
+                "Офлайн-подсказка только в composer — чистый список чатов",
             )
             settingsHealthCheck = "Проверка здоровья"
             whatsNewTitle = "Новое в PROTO 1.0.48"

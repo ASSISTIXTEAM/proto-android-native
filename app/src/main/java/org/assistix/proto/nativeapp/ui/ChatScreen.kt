@@ -184,12 +184,10 @@ fun ChatScreen(
     val ctx = LocalContext.current
     val app = ctx.applicationContext as ProtoApplication
     val online by app.network.isOnline.collectAsState(initial = app.network.checkOnline())
-    var queuedOutbox by remember { mutableIntStateOf(0) }
-    val cellsStats by app.cellsManager.stats.collectAsState()
-    val cellsRepair by app.cellsManager.repairActive.collectAsState()
-    LaunchedEffect(online) {
+    var queuedInChat by remember { mutableIntStateOf(0) }
+    LaunchedEffect(online, conversationId) {
         while (isActive) {
-            queuedOutbox = withContext(Dispatchers.IO) { messages.pendingOutboxCount() }
+            queuedInChat = withContext(Dispatchers.IO) { messages.pendingOutboxCountFor(conversationId) }
             delay(2500)
         }
     }
@@ -1865,13 +1863,6 @@ fun ChatScreen(
     ) { pad ->
         Box(Modifier.padding(pad).fillMaxSize()) {
             Column(Modifier.fillMaxSize().imePadding()) {
-            ProtoGlobalProgressBar()
-            ProtoOfflineBanner(
-                offline = !online,
-                queuedCount = queuedOutbox,
-                cellsPending = cellsStats.holdsPending,
-                cellsRepairing = cellsRepair,
-            )
             pinnedInfo?.let { pin ->
                 ProtoSurfaceCard(
                     onClick = { jumpToReplyMessage(pin.messageId) },
@@ -2310,6 +2301,7 @@ fun ChatScreen(
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f), ProtoShapes.field)
                     .padding(horizontal = 6.dp, vertical = 8.dp),
             ) {
+                ProtoComposerOfflineHint(offline = !online, queuedInChat = queuedInChat)
                 replyTarget?.let { ComposerReplyBar(it) { replyTarget = null } }
                 pendingMedia?.let { pending ->
                     MediaSendReviewPanel(

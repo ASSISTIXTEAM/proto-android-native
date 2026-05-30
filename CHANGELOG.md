@@ -4,28 +4,36 @@ All notable changes to the **PROTO Android** open client source are documented h
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.8] — 2026-05-30
+
+**versionCode:** 112 · **Tag:** [v1.1.8](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.8)
+
+**Stable** — Cells P2P, adaptive striping, health check UI.
+
+### Added
+
+- **Cells P2P** — shard transfer directly between chat members via WebRTC; server relay is fallback only
+- **Adaptive striping** — small blobs use **3+1** parity (< 48 KB cipher), large files **7+1** (`ProtoCellsConfig.planForCipher`)
+- **Health check** screen in Settings — Cells sync, Whisper, crash log buffer, build info
+- **Anonymous crash reports** toggle (stack traces only)
+- Multi-transfer progress UI, composer offline queue hints
+
+### Improved
+
+- Offline Cells hint moved to composer only — cleaner chat list
+- Faster media downloads when peers are online in the same chat
+
+---
+
 ## [1.1.6] — 2026-05-30
 
 **versionCode:** 110 · **Tag:** [v1.1.6](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.6)
 
-**Stable** release — fixes crashes and storage issues from **1.1.5**. Recommended for all builds.
+**Stable** — fixes crashes from **1.1.5**. Protected storage, DB recovery, Cells-P XOR parity.
 
 ### Fixed
 
-- **Launch crashes on Android 11+** — settings and local data moved to protected app storage (`ProtoPersistentStorage`)
-- **Corrupted DB / prefs recovery** — automatic rebuild when Room or DataStore files are damaged
-- **PROTO Cells stability** — safer background sync, repair, and maintenance loops
-- Crashes and edge cases in settings, onboarding, and chat flows
-
-### Improved
-
-- **Cells-P encoding** — 7 data stripes + 1 XOR parity shard (8 total); one missing data shard recovers automatically
-- Cells stats UI in Settings (node tier, storage quota)
-- Legacy 7-shard mirror blobs still supported as fallback
-
-### Notes
-
-- **Do not use [1.1.5](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.5)** for production — marked **unstable** (known crashes).
+- Launch crashes on Android 11+, corrupted DB/prefs recovery, Cells stability
 
 ---
 
@@ -33,46 +41,29 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 **versionCode:** 107 · **Tag:** [v1.1.5](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.5)
 
-> **Not recommended.** Known launch crashes on Android 11+ and Cells-related instability.  
-> **Use [1.1.6](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.6) instead.**
+> **Not recommended.** Known crashes on Android 11+. Use **1.1.6+** instead.
 
-First public **PROTO Cells** release. Kept in history for reference only.
-
-### Added
-
-- **PROTO Cells** — AES-256-GCM encrypted media mesh (`ProtoCellsManager`, `data/cells/*`)
-- Mandatory enrollment, Cells UI, media from 8 KB, background sync
-- [docs/PROTO_CELLS.md](docs/PROTO_CELLS.md)
+First public **PROTO Cells** release.
 
 ---
 
 ## [1.1.2] — 2026-05-30
 
-**versionCode:** 103 · **Tag:** [v1.1.2](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.2)
-
-Refinement release: smarter Pulse, offline polish, and chat-list UX.
-
-### Improved
-
-- **Chat Pulse**, **Assistix language**, **Archive UX**, **Offline** polish
-- Connectivity advisor, app update UI, WebRTC ICE, API origin fallback
+**versionCode:** 103 · Pulse, offline polish, archive UX.
 
 ---
 
 ## [1.1.1] — 2026-05-30
 
-**versionCode:** 102 · **Tag:** [v1.1.1](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.1)
-
-First stable public source release after the early `1.0.99` preview.
+**versionCode:** 102 · First stable public source release.
 
 ---
 
 ## [1.0.99] — 2026-05-30
 
-**versionCode:** 99 · Early public preview
+**versionCode:** 99 · Early public preview.
 
-- Initial open-source client drop
-
+[1.1.8]: https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.8
 [1.1.6]: https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.6
 [1.1.5]: https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.5
 [1.1.2]: https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.2

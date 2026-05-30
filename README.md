@@ -4,7 +4,7 @@
 
 **Нативный клиент мессенджера PROTO** — Kotlin, Jetpack Compose, звонки, виджеты, Assistix AI.
 
-[![Version](https://img.shields.io/badge/version-1.1.6-FF6B00?style=for-the-badge)](https://github.com/ASSISTIXTEAM/proto-android-native/releases)
+[![Version](https://img.shields.io/badge/version-1.1.8-FF6B00?style=for-the-badge)](https://github.com/ASSISTIXTEAM/proto-android-native/releases)
 [![Platform](https://img.shields.io/badge/Platform-Android_8%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Compose](https://img.shields.io/badge/Jetpack_Compose-UI-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
@@ -14,9 +14,7 @@
 
 [proto.su](https://proto.su) · [Releases](https://github.com/ASSISTIXTEAM/proto-android-native/releases) · [Changelog](CHANGELOG.md) · [PROTO Cells](docs/PROTO_CELLS.md) · [Issues](https://github.com/ASSISTIXTEAM/proto-android-native/issues) · [Contributing](CONTRIBUTING.md) · [License](LICENSE)
 
-*Публичный релиз **1.1.6** (stable) · client-only source · **PROTO Cells***
-
-> ⚠️ **[1.1.5](https://github.com/ASSISTIXTEAM/proto-android-native/releases/tag/v1.1.5)** помечен как **нестабильный** — известны вылеты на Android 11+; используй **1.1.6**.
+*Публичный релиз **1.1.8** (stable) · client-only source · **PROTO Cells***
 
 </div>
 
@@ -50,7 +48,7 @@
 | 🌍 | **i18n** | EN / RU / IT и др. |
 | 🔐 | **Vault & PIN** | Защита чувствительных экранов |
 | 📷 | **QR & deep links** | Вход по QR, ссылки `proto.su` |
-| 🐝 | **[PROTO Cells](docs/PROTO_CELLS.md)** | Cells-P: 7 data + XOR parity, AES-256, gzip mesh |
+| 🐝 | **[PROTO Cells](docs/PROTO_CELLS.md)** | P2P shard transfer, adaptive 3+1 / 7+1 striping |
 
 > **Бэкенда нет.** Сервер, ключи продакшена и инфраструктура в репо не публикуются.
 
@@ -71,8 +69,8 @@
 | | |
 |---|---|
 | **Шифрование** | AES-256-GCM до отправки с телефона |
-| **Шарды** | **Cells-P:** 7 data-полос + 1 XOR parity (8 total) |
-| **Восстановление** | Один пропавший data-шард восстанавливается из parity |
+| **Striping** | Adaptive **Cells-P:** малые файлы **3+1**, крупные **7+1** |
+| **P2P** | Шарды между участниками чата через **WebRTC**; relay — fallback |
 | **Порог** | Медиа от **8 KB** автоматически попадает в mesh |
 | **На диске** | Gzip-сжатые шарды (`PCGZ`) — держатель не видит plaintext |
 | **Сервер** | Каталог + кратковременный relay, **не** полные файлы |
@@ -156,8 +154,8 @@ vendor/whisper.cpp/        vendored STT
 
 | | |
 |---|---|
-| **versionName** | `1.1.6` |
-| **versionCode** | `110` |
+| **versionName** | `1.1.8` |
+| **versionCode** | `112` |
 | **Статус** | stable public client source |
 
 ---

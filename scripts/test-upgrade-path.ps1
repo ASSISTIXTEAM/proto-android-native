@@ -8,7 +8,9 @@ $builds = Join-Path (Split-Path $PSScriptRoot -Parent) "..\BUILDS"
 $chain = @(
     "PROTO-1.1.4-Android.apk",
     "PROTO-1.1.5-Android.apk",
-    "PROTO-1.1.6-Android.apk"
+    "PROTO-1.1.6-Android.apk",
+    "PROTO-1.1.7-Android.apk",
+    "PROTO-1.1.8-Android.apk"
 )
 
 if (-not (Test-Path $Adb)) { Write-Error "adb not found at $Adb"; exit 1 }

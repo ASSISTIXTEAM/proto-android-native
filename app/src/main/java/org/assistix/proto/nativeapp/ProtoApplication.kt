@@ -57,6 +57,7 @@ class ProtoApplication : Application() {
     lateinit var assistixChat: AssistixChatRepository
     lateinit var cache: ProtoCacheManager
     lateinit var cellsManager: org.assistix.proto.nativeapp.data.cells.ProtoCellsManager
+    lateinit var cellsP2p: org.assistix.proto.nativeapp.data.cells.ProtoCellsP2pManager
     lateinit var mediaResolver: ProtoMediaResolver
     lateinit var cachePrefetch: ProtoCachePrefetcher
     lateinit var network: ProtoNetworkMonitor
@@ -113,7 +114,20 @@ class ProtoApplication : Application() {
         profileCache = org.assistix.proto.nativeapp.data.ProtoProfileCache(offlineVault, api)
         connectivity = org.assistix.proto.nativeapp.data.ProtoConnectivityAdvisor(this, network, api)
         cache = ProtoCacheManager(this)
-        cellsManager = org.assistix.proto.nativeapp.data.cells.ProtoCellsManager(this, api, network)
+        val cellsP2p = org.assistix.proto.nativeapp.data.cells.ProtoCellsP2pManager(this, api, network) { if (::calls.isInitialized) calls else null }
+        cellsManager =
+            org.assistix.proto.nativeapp.data.cells.ProtoCellsManager(
+                this,
+                api,
+                network,
+                cellsP2p,
+            ) {
+                if (::session.isInitialized) {
+                    kotlinx.coroutines.runBlocking { session.userId() }
+                } else {
+                    0
+                }
+            }
 
         val dao =
             runCatching { ProtoDatabase.get(this).dao() }
@@ -169,8 +183,23 @@ class ProtoApplication : Application() {
         if (!::prefs.isInitialized) prefs = ProtoAppPreferences(this)
         if (!::themeStore.isInitialized) themeStore = ProtoThemeStore(this)
         if (!::notifier.isInitialized) notifier = ProtoNotifier(this)
+        if (!::cellsP2p.isInitialized) {
+            cellsP2p = org.assistix.proto.nativeapp.data.cells.ProtoCellsP2pManager(this, api, network) { if (::calls.isInitialized) calls else null }
+        }
         if (!::cellsManager.isInitialized) {
-            cellsManager = org.assistix.proto.nativeapp.data.cells.ProtoCellsManager(this, api, network)
+            cellsManager =
+                org.assistix.proto.nativeapp.data.cells.ProtoCellsManager(
+                    this,
+                    api,
+                    network,
+                    cellsP2p,
+                ) {
+                if (::session.isInitialized) {
+                    kotlinx.coroutines.runBlocking { session.userId() }
+                } else {
+                    0
+                }
+            }
         }
         if (!::cache.isInitialized) cache = ProtoCacheManager(this)
         if (!::pendingVerification.isInitialized) pendingVerification = ProtoPendingVerificationStore(this)

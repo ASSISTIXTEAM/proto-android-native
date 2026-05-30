@@ -365,6 +365,7 @@ fun CacheSettingsScreen(
                 )
 
                 SettingsInfoText(UiStrings.cacheAvatarsHint)
+                SettingsInfoText(UiStrings.cacheVaultHint)
 
                 Spacer(Modifier.height(4.dp))
 

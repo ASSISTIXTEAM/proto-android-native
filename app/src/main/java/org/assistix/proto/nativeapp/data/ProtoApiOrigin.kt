@@ -3,10 +3,7 @@ package org.assistix.proto.nativeapp.data
 import android.content.Context
 import org.assistix.proto.nativeapp.BuildConfig
 
-/**
- * API base URL with fallback when api.proto.su vhost is misconfigured (HTML 404).
- * Working origin is cached after the first successful JSON response.
- */
+/** API base URL with fallback when api.proto.su vhost is misconfigured (HTML 404). */
 object ProtoApiOrigin {
     private const val PREFS = "proto_api_origin"
     private const val KEY = "preferred_origin"

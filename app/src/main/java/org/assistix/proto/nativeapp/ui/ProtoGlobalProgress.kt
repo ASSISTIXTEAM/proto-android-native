@@ -15,15 +15,25 @@ import androidx.compose.ui.unit.dp
 import org.assistix.proto.nativeapp.data.ProtoTransferProgressHub
 
 @Composable
-fun ProtoGlobalProgressBar(modifier: Modifier = Modifier) {
+fun ProtoGlobalProgressBar(
+    modifier: Modifier = Modifier,
+    /** Hide Cells upload/sync/repair jobs on main chat surfaces — details live in Settings → Cells. */
+    hideCellsJobs: Boolean = false,
+) {
     val jobs by ProtoTransferProgressHub.active.collectAsState()
-    if (jobs.isEmpty()) return
-    val primary = jobs.first()
+    val visible =
+        if (hideCellsJobs) {
+            jobs.filter { !it.id.startsWith("cells-") }
+        } else {
+            jobs
+        }
+    if (visible.isEmpty()) return
+    val primary = visible.first()
     val aggregate =
-        if (jobs.size == 1) {
+        if (visible.size == 1) {
             primary.progress
         } else {
-            val known = jobs.filter { it.progress >= 0f }
+            val known = visible.filter { it.progress >= 0f }
             if (known.isEmpty()) -1f else known.map { it.progress }.average().toFloat()
         }
     Column(modifier.fillMaxWidth()) {
@@ -39,9 +49,9 @@ fun ProtoGlobalProgressBar(modifier: Modifier = Modifier) {
                 color = ProtoOrange,
             )
         }
-        if (jobs.size == 1 || primary.label.isNotBlank()) {
+        if (visible.size == 1 || primary.label.isNotBlank()) {
             Text(
-                if (jobs.size > 1) UiStrings.transferProgressMulti(jobs.size) else primary.label,
+                if (visible.size > 1) UiStrings.transferProgressMulti(visible.size) else primary.label,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,

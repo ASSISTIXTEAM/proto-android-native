@@ -54,6 +54,9 @@ interface ProtoDao {
     @Query("SELECT * FROM outbox ORDER BY createdAt ASC")
     suspend fun outboxAll(): List<OutboxEntity>
 
+    @Query("SELECT COUNT(*) FROM outbox WHERE conversationId = :cid")
+    suspend fun outboxCountFor(cid: Int): Int
+
     @Query("SELECT COUNT(*) FROM outbox")
     suspend fun outboxCount(): Int
 

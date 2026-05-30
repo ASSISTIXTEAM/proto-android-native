@@ -7,7 +7,7 @@ import org.assistix.proto.nativeapp.data.ProtoPersistentStorage
 class ProtoCellsStore(context: Context) {
     private val appCtx = context.applicationContext
     private val root: File
-        get() = File(ProtoPersistentStorage.rootDir(appCtx), "cells").apply { mkdirs() }
+        get() = ProtoPersistentStorage.cellsDir(appCtx)
 
     fun shardFile(blobId: String, index: Int): File {
         val safe = blobId.replace(Regex("[^a-zA-Z0-9._-]"), "_").take(120)

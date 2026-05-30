@@ -147,6 +147,10 @@ class L10nBundle {
     var dataStorageStt: String = ""
     var dataStoragePrefs: String = ""
     var dataStorageBackups: String = ""
+    var dataStorageCells: String = "PROTO Cells (encrypted)"
+    var dataStorageMedia: String = "Encrypted media"
+    var dataStorageVaultHint: String =
+        "Cells shards and encrypted vault are never removed when you clear cache. With full file access, Documents/PROTO survives «clear app data»."
     var dataStoragePermissionHint: String = ""
     var dataStorageGrantAccess: String = ""
     var dataStorageOpenFolder: String = ""
@@ -811,6 +815,8 @@ class L10nBundle {
     var cacheStorageTitle: String = ""
     var cacheTotalFmt: String = ""
     var cacheAvatarsHint: String = ""
+    var cacheVaultHint: String =
+        "PROTO Cells encrypted shards and the vault folder are never cleared here — only disposable media cache."
     var cacheCategoryChats: String = ""
     var cacheCategoryPhotos: String = ""
     var cacheCategoryVideos: String = ""
@@ -914,6 +920,11 @@ class L10nBundle {
     var cellsTierNode: String = "Hive node"
     var cellsStorageFmt: String = "%s / %s stored"
     var cellsHelpedFmt: String = "Helped %d chats"
+    var cellsLocalShardsFmt: String = "%d local shards · %s on device"
+    var cellsLastSyncFmt: String = "Last sync: %s"
+    var cellsVaultTitle: String = "Protected vault"
+    var cellsVaultBody: String =
+        "Encrypted shards stay in Documents/PROTO/cells. Cache wipe and «clear data» do not delete them when storage access is granted."
     var cellsRepairBadge: String = "Network repairing media"
     var cellsRepairNotifyTitle: String = "PROTO Cells"
     var cellsRepairNotifyBody: String = "The network is repairing encrypted media shards"
@@ -938,6 +949,8 @@ class L10nBundle {
     var transferProgressMulti: String = "%d transfers in progress"
     var offlineCellsPendingFmt: String = "Media syncing via Cells"
     var offlineSendWhenOnline: String = "Messages send when you're back online"
+    var composerOfflineQueuedFmt: String = "%d messages will send when you're back online"
+    var composerQueuedFmt: String = "%d messages sending…"
     var whatsNewCurrentTitle: String = "What's new"
     var whatsNewCurrentBullets: List<String> = emptyList()
     var settingsHealthCheck: String = "Health check"
@@ -1132,6 +1145,9 @@ class L10nBundle {
         dataStorageStt = source.dataStorageStt
         dataStoragePrefs = source.dataStoragePrefs
         dataStorageBackups = source.dataStorageBackups
+        dataStorageCells = source.dataStorageCells
+        dataStorageMedia = source.dataStorageMedia
+        dataStorageVaultHint = source.dataStorageVaultHint
         dataStoragePermissionHint = source.dataStoragePermissionHint
         dataStorageGrantAccess = source.dataStorageGrantAccess
         dataStorageOpenFolder = source.dataStorageOpenFolder
@@ -1796,6 +1812,7 @@ class L10nBundle {
         cacheStorageTitle = source.cacheStorageTitle
         cacheTotalFmt = source.cacheTotalFmt
         cacheAvatarsHint = source.cacheAvatarsHint
+        cacheVaultHint = source.cacheVaultHint
         cacheCategoryChats = source.cacheCategoryChats
         cacheCategoryPhotos = source.cacheCategoryPhotos
         cacheCategoryVideos = source.cacheCategoryVideos
@@ -1880,6 +1897,10 @@ class L10nBundle {
         cellsTierNode = source.cellsTierNode
         cellsStorageFmt = source.cellsStorageFmt
         cellsHelpedFmt = source.cellsHelpedFmt
+        cellsLocalShardsFmt = source.cellsLocalShardsFmt
+        cellsLastSyncFmt = source.cellsLastSyncFmt
+        cellsVaultTitle = source.cellsVaultTitle
+        cellsVaultBody = source.cellsVaultBody
         cellsRepairBadge = source.cellsRepairBadge
         cellsRepairNotifyTitle = source.cellsRepairNotifyTitle
         cellsRepairNotifyBody = source.cellsRepairNotifyBody
@@ -1904,6 +1925,8 @@ class L10nBundle {
         transferProgressMulti = source.transferProgressMulti
         offlineCellsPendingFmt = source.offlineCellsPendingFmt
         offlineSendWhenOnline = source.offlineSendWhenOnline
+        composerOfflineQueuedFmt = source.composerOfflineQueuedFmt
+        composerQueuedFmt = source.composerQueuedFmt
         whatsNewCurrentTitle = source.whatsNewCurrentTitle
         whatsNewCurrentBullets = source.whatsNewCurrentBullets
         settingsHealthCheck = source.settingsHealthCheck
