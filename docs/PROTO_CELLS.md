@@ -1,5 +1,11 @@
 # PROTO Cells
 
+<div align="center">
+
+<img src="assets/PROTO_Cells.png" alt="PROTO Cells — decentralized encrypted shard mesh" width="720">
+
+</div>
+
 **PROTO Cells** — взаимная зашифрованная сеть хранения медиа в PROTO. Фото, видео и файлы из чатов не лежат целиком на одном сервере: клиенты делят их на **зашифрованные шарды** и хранят у себя на устройствах участников и волонтёров сети.
 
 > **Client-only repo:** здесь описана логика **Android-клиента**. Каталог и кратковременный relay шардов обслуживает backend (`/api/cells.php`), который в этот репозиторий не входит.
