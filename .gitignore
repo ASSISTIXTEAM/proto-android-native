@@ -1,20 +1,13 @@
 *.iml
 .gradle
-.kotlin
 /local.properties
 /.idea
 .DS_Store
 /build
-app/build
 /captures
 .externalNativeBuild
 .cxx
 release-signing.properties
-secrets.properties
 keystore/*.jks
 keystore/*.keystore
 !keystore/.gitkeep
-
-# Large STT model downloads (not part of the UI source tree)
-*.bin
-*.gguf

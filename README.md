@@ -4,7 +4,7 @@
 
 **Нативный клиент мессенджера PROTO** — Kotlin, Jetpack Compose, звонки, виджеты, Assistix AI.
 
-[![Version](https://img.shields.io/badge/version-1.0.99-FF6B00?style=for-the-badge)](https://github.com/ASSISTIXTEAM/proto-android-native/releases)
+[![Version](https://img.shields.io/badge/version-1.1.1-FF6B00?style=for-the-badge)](https://github.com/ASSISTIXTEAM/proto-android-native/releases)
 [![Platform](https://img.shields.io/badge/Platform-Android_8%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Compose](https://img.shields.io/badge/Jetpack_Compose-UI-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
@@ -14,7 +14,7 @@
 
 [proto.su](https://proto.su) · [Issues](https://github.com/ASSISTIXTEAM/proto-android-native/issues) · [Contributing](CONTRIBUTING.md) · [License](LICENSE)
 
-*Ранний публичный снимок · скоро **1.1.0***
+*Публичный релиз **1.1.1** · client-only source*
 
 </div>
 
@@ -126,9 +126,9 @@ vendor/whisper.cpp/        vendored STT
 
 | | |
 |---|---|
-| **versionName** | `1.0.99` |
-| **versionCode** | `99` |
-| **Статус** | early preview → **1.1.0** в roadmap |
+| **versionName** | `1.1.1` |
+| **versionCode** | `102` |
+| **Статус** | stable public client source |
 
 ---
 

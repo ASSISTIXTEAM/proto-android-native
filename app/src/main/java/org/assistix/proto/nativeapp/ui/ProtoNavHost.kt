@@ -22,6 +22,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -223,7 +230,7 @@ fun ProtoNavHost(
             accountRestriction = null
             return@LaunchedEffect
         }
-        val load = withContext(Dispatchers.IO) { api.me(t) }
+        val load = withContext(Dispatchers.IO) { app.profileCache.loadMe(t) }
         accountRestriction = load?.restriction?.takeIf { it.isActive }
     }
 
@@ -588,8 +595,7 @@ fun ProtoNavHost(
             }
             composable("home") {
                 val homeCtx = LocalContext.current
-                var tab by remember { mutableStateOf(MainTab.Pulse) }
-                var pulseReloadTick by remember { mutableIntStateOf(0) }
+                var tab by remember { mutableStateOf(MainTab.Chats) }
                 LaunchedEffect(ProtoShareState.active) {
                     if (ProtoShareState.active) {
                         tab = MainTab.Chats
@@ -721,7 +727,6 @@ fun ProtoNavHost(
                     when (tab) {
                         MainTab.Settings -> UiStrings.settings
                         MainTab.Chats -> UiStrings.chats
-                        MainTab.Pulse -> UiStrings.pulseTitle
                         MainTab.Assistix -> UiStrings.assistixAi
                         MainTab.Profile -> UiStrings.profile
                     }
@@ -770,16 +775,6 @@ fun ProtoNavHost(
                                             Icon(Icons.Default.Refresh, contentDescription = UiStrings.refreshChats)
                                         }
                                     }
-                                    if (tab == MainTab.Pulse) {
-                                        IconButton(
-                                            onClick = {
-                                                haptic(HapticKind.Tap)
-                                                pulseReloadTick++
-                                            },
-                                        ) {
-                                            Icon(Icons.Default.Refresh, contentDescription = UiStrings.refreshChats)
-                                        }
-                                    }
                                 },
                             )
                         }
@@ -788,7 +783,10 @@ fun ProtoNavHost(
                     bottomBar = { ProtoBottomBar(selected = tab, onSelect = { tab = it }) },
                 ) { pad ->
                     Box(Modifier.padding(pad).fillMaxSize()) {
+                        Column(Modifier.fillMaxSize()) {
+                            ProtoConnectivityBanner(advisor = app.connectivity)
                         AnimatedContent(
+                            modifier = Modifier.weight(1f).fillMaxWidth(),
                             targetState = tab,
                             transitionSpec = {
                                 fadeIn(ProtoMotion.fade(reduceMotion, 320)) togetherWith fadeOut(ProtoMotion.fade(reduceMotion, 200))
@@ -890,21 +888,6 @@ fun ProtoNavHost(
                                         navigateToConversation(nav, id, title, kind, peerId)
                                     },
                                 )
-                            MainTab.Pulse ->
-                                ProtoPulseScreen(
-                                    session = session,
-                                    api = api,
-                                    languageCode = languageCode,
-                                    reloadTick = pulseReloadTick,
-                                    onOpenChat = { id, title, kind, peerId ->
-                                        navigateToConversation(nav, id, title, kind, peerId)
-                                    },
-                                    onOpenChannelFeed = { cid, encTitle ->
-                                        val enc =
-                                            URLEncoder.encode(encTitle, StandardCharsets.UTF_8.name())
-                                        nav.navigate("channel_feed/$cid/$enc") { launchSingleTop = true }
-                                    },
-                                )
                             MainTab.Assistix ->
                                 AssistixAiTab(
                                     token = authToken,
@@ -915,7 +898,14 @@ fun ProtoNavHost(
                                     stt = app.stt,
                                     homeResetTick = assistixHomeReset,
                                 )
-                            MainTab.Profile -> MyProfileTab(session = session, api = api, reduceMotion = reduceMotion)
+                            MainTab.Profile ->
+                                MyProfileTab(
+                                    session = session,
+                                    api = api,
+                                    profileCache = app.profileCache,
+                                    reduceMotion = reduceMotion,
+                                )
+                        }
                         }
                         }
                         }
@@ -1235,6 +1225,7 @@ fun ProtoNavHost(
             UserProfileSheet(
                 userId = profileUid,
                 api = api,
+                profileCache = app.profileCache,
                 token = authToken,
                 onDismiss = { viewingUserId = null },
                 onMessage = { uid, title, peerId ->
@@ -1714,6 +1705,67 @@ private fun ChatListScreen(
         groupsOnly = false
         pinnedOnly = false
         notesOnly = false
+    }
+
+    fun openArchiveFolder() {
+        clearAllListFilters()
+        archiveOnly = true
+    }
+
+    val chatListState = rememberLazyListState()
+    var archivePullPx by remember { mutableFloatStateOf(0f) }
+    val archiveDensity = LocalDensity.current
+    val archiveOpenThresholdPx = with(archiveDensity) { 128.dp.toPx() }
+    val archivePullConnection =
+        remember(chatListState, archiveOnly, searchActive) {
+            object : NestedScrollConnection {
+                override fun onPreScroll(
+                    available: Offset,
+                    source: NestedScrollSource,
+                ): Offset {
+                    if (archiveOnly || searchActive) return Offset.Zero
+                    if (available.y < 0f && archivePullPx > 0f) {
+                        val consumed = minOf(-available.y, archivePullPx)
+                        archivePullPx -= consumed
+                        return Offset(0f, -consumed)
+                    }
+                    return Offset.Zero
+                }
+
+                override fun onPostScroll(
+                    consumed: Offset,
+                    available: Offset,
+                    source: NestedScrollSource,
+                ): Offset {
+                    if (archiveOnly || searchActive) return Offset.Zero
+                    val atTop =
+                        chatListState.firstVisibleItemIndex == 0 &&
+                            chatListState.firstVisibleItemScrollOffset == 0
+                    if (!atTop) {
+                        if (archivePullPx > 0f) archivePullPx = 0f
+                        return Offset.Zero
+                    }
+                    if (available.y > 0f) {
+                        val pull = available.y * 0.5f
+                        archivePullPx = (archivePullPx + pull).coerceAtMost(archiveOpenThresholdPx * 1.35f)
+                        return Offset(0f, pull)
+                    }
+                    return Offset.Zero
+                }
+
+                override suspend fun onPreFling(available: Velocity): Velocity {
+                    if (!archiveOnly && archivePullPx >= archiveOpenThresholdPx * 0.88f) {
+                        haptic(HapticKind.Action)
+                        openArchiveFolder()
+                    }
+                    archivePullPx = 0f
+                    return Velocity.Zero
+                }
+            }
+        }
+
+    BackHandler(archiveOnly && !chatSelectionMode && !forwardActive && !shareActive) {
+        clearAllListFilters()
     }
 
     val anyListFilter =
@@ -2555,9 +2607,44 @@ private fun ChatListScreen(
                             modifier = Modifier.fillMaxSize(),
                         ) {
                         LazyColumn(
+                            state = chatListState,
+                            modifier = Modifier.fillMaxSize().nestedScroll(archivePullConnection),
                             contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 0.dp, bottom = 8.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
+                            if (archiveOnly) {
+                                item(key = "archive-back") {
+                                    ProtoGhostButton(
+                                        UiStrings.backFromArchive,
+                                        {
+                                            haptic(HapticKind.Tap)
+                                            clearAllListFilters()
+                                        },
+                                        Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                                    )
+                                }
+                            }
+                            if (!archiveOnly && !searchActive) {
+                                item(key = "archive-folder") {
+                                    val reveal = (archivePullPx / archiveOpenThresholdPx).coerceIn(0f, 1f)
+                                    if (archivedIds.isNotEmpty() || reveal > 0.04f) {
+                                        ChatArchiveFolderRow(
+                                            archivedCount = archivedIds.size,
+                                            pullReveal = reveal,
+                                            pullHint =
+                                                if (reveal > 0.88f) {
+                                                    UiStrings.archivePullRelease
+                                                } else {
+                                                    UiStrings.archivePullHint
+                                                },
+                                            onOpenArchive = {
+                                                haptic(HapticKind.Tap)
+                                                openArchiveFolder()
+                                            },
+                                        )
+                                    }
+                                }
+                            }
                             if (showProtoSubscribeBanner && !searchActive) {
                                 item(key = "proto-subscribe-banner") {
                                     ProtoSurfaceCard(onClick = onOpenProtoChannel) {

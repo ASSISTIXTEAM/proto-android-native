@@ -17,7 +17,7 @@ object ProtoClientPrefsSync {
             chatLocalPrefs.replaceFoldersPayload(remote.chatFolders)
         }
         if (remote.chatDrafts.isNotBlank()) {
-            draftPrefs.importPayload(remote.chatDrafts)
+            draftPrefs.mergeRemotePayload(remote.chatDrafts)
         }
         appPrefs.setNotifyMentionsOnly(remote.notifyMentionsOnly)
     }

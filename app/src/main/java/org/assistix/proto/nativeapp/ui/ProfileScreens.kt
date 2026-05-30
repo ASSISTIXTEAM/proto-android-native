@@ -118,6 +118,7 @@ private fun ProfileLoadError(onRetry: () -> Unit) {
 fun MyProfileTab(
     session: ProtoSessionStore,
     api: ProtoApi,
+    profileCache: org.assistix.proto.nativeapp.data.ProtoProfileCache,
     reduceMotion: Boolean = false,
 ) {
     val ctx = LocalContext.current
@@ -146,15 +147,18 @@ fun MyProfileTab(
         status = p.statusText
         statusEmoji = p.statusEmoji
         loadFailed = false
+        scope.launch {
+            profileCache.persistMe(p, restriction?.takeIf { it.isActive })
+        }
     }
 
     LaunchedEffect(token, reloadTick) {
         val t = token ?: return@LaunchedEffect
         loadFailed = false
-        val loaded = runCatching { withContext(Dispatchers.IO) { api.me(t) } }.getOrNull()
-        if (loaded?.profile != null) {
-            applyProfile(loaded.profile)
-            restriction = loaded.restriction?.takeIf { it.isActive }
+        val cached = withContext(Dispatchers.IO) { profileCache.loadMe(t) }
+        if (cached?.profile != null) {
+            applyProfile(cached.profile)
+            restriction = cached.restriction?.takeIf { it.isActive }
         } else {
             profile = null
             loadFailed = true
@@ -502,6 +506,7 @@ fun MyProfileTab(
 fun UserProfileSheet(
     userId: Int,
     api: ProtoApi,
+    profileCache: org.assistix.proto.nativeapp.data.ProtoProfileCache,
     token: String?,
     onDismiss: () -> Unit,
     onMessage: ((userId: Int, title: String, peerId: Int) -> Unit)? = null,
@@ -525,7 +530,7 @@ fun UserProfileSheet(
             loadFailed = true
             return@LaunchedEffect
         }
-        val loaded = runCatching { withContext(Dispatchers.IO) { api.userById(t, userId) } }.getOrNull()
+        val loaded = withContext(Dispatchers.IO) { profileCache.loadUser(t, userId) }
         if (loaded != null) user = loaded else loadFailed = true
     }
 

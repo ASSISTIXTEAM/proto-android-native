@@ -194,8 +194,8 @@ fun ChatScreen(
     val tokenFlow = session.tokenFlow.collectAsState(initial = null)
     val token = tokenFlow.value
     var aiEnabled by remember { mutableStateOf(false) }
-    var copilotOpen by remember { mutableStateOf(false) }
-    var copilotSeed by remember { mutableStateOf<String?>(null) }
+    var chatPulseOpen by remember { mutableStateOf(false) }
+    var chatPulseSeed by remember { mutableStateOf<String?>(null) }
     var assistixOpen by remember { mutableStateOf(false) }
     var aiExplainSheet by remember { mutableStateOf<String?>(null) }
     val msgs by messages.observeConversation(conversationId).collectAsState(initial = emptyList())
@@ -626,15 +626,26 @@ fun ChatScreen(
     }
 
     LaunchedEffect(conversationId) {
+        draftPrefs.ensureRecovered()
         draft = savedDraft
     }
     LaunchedEffect(draft, conversationId) {
-        if (draft == savedDraft && draft.isNotEmpty()) return@LaunchedEffect
-        delay(350)
+        if (draft == savedDraft) return@LaunchedEffect
         draftPrefs.setDraft(conversationId, draft)
+    }
+    LaunchedEffect(draft, conversationId, token, online) {
+        if (!online) return@LaunchedEffect
         val t = token ?: return@LaunchedEffect
-        delay(400)
+        if (draft == savedDraft) return@LaunchedEffect
+        delay(600)
         org.assistix.proto.nativeapp.data.ProtoClientPrefsSync.pushDrafts(t, api, draftPrefs)
+    }
+    androidx.compose.runtime.DisposableEffect(conversationId) {
+        onDispose {
+            scope.launch {
+                draftPrefs.setDraft(conversationId, draft)
+            }
+        }
     }
     LaunchedEffect(conversationId, token) {
         val t = token ?: return@LaunchedEffect
@@ -1409,11 +1420,11 @@ fun ChatScreen(
                 },
                 actions = {
                     if (aiEnabled && !isSaved && !isChannel) {
-                        IconButton(onClick = { copilotOpen = !copilotOpen }) {
+                        IconButton(onClick = { chatPulseOpen = !chatPulseOpen }) {
                             Icon(
                                 Icons.Default.AutoAwesome,
-                                contentDescription = UiStrings.chatCopilot,
-                                tint = if (copilotOpen) ProtoOrange else MaterialTheme.colorScheme.onSurface,
+                                contentDescription = UiStrings.chatPulse,
+                                tint = if (chatPulseOpen) ProtoOrange else MaterialTheme.colorScheme.onSurface,
                             )
                         }
                     }
@@ -1833,8 +1844,8 @@ fun ChatScreen(
             }
         },
     ) { pad ->
-        Row(Modifier.padding(pad).fillMaxSize()) {
-            Column(Modifier.weight(1f).fillMaxHeight().imePadding()) {
+        Box(Modifier.padding(pad).fillMaxSize()) {
+            Column(Modifier.fillMaxSize().imePadding()) {
             ProtoOfflineBanner(offline = !online, queuedCount = queuedOutbox)
             pinnedInfo?.let { pin ->
                 ProtoSurfaceCard(
@@ -2140,9 +2151,9 @@ fun ChatScreen(
                             onDiscussLink =
                                 if (aiEnabled) {
                                     { card ->
-                                        copilotSeed =
+                                        chatPulseSeed =
                                             "PROTO Link: ${card.url}\n${card.aiSummary.ifBlank { card.title }}"
-                                        copilotOpen = true
+                                        chatPulseOpen = true
                                     }
                                 } else {
                                     null
@@ -2525,7 +2536,8 @@ fun ChatScreen(
                 }
             }
             }
-            AnimatedVisibility(visible = copilotOpen && aiEnabled) {
+            if (chatPulseOpen && aiEnabled) {
+                val pulseSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
                 val previewLines =
                     remember(msgs) {
                         msgs.takeLast(30).map { m ->
@@ -2533,18 +2545,37 @@ fun ChatScreen(
                             "$who: ${m.body.take(100)}"
                         }
                     }
-                ChatCopilotSidebar(
-                    token = token,
-                    api = api,
-                    languageCode = languageCode,
-                    chatTitle = title,
-                    messagePreviewLines = previewLines,
-                    initialPrompt = copilotSeed,
-                    onClose = {
-                        copilotOpen = false
-                        copilotSeed = null
+                LaunchedEffect(chatPulseOpen, token) {
+                    val t = token ?: return@LaunchedEffect
+                    if (chatPulseOpen) {
+                        withContext(Dispatchers.IO) {
+                            api.assistixCatalog(t)?.rateLimit?.let { org.assistix.proto.nativeapp.data.AssistixUsageHub.apply(it) }
+                        }
+                    }
+                }
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        chatPulseOpen = false
+                        chatPulseSeed = null
                     },
-                )
+                    sheetState = pulseSheetState,
+                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    dragHandle = null,
+                ) {
+                    ChatPulseSheet(
+                        token = token,
+                        api = api,
+                        languageCode = languageCode,
+                        chatTitle = title,
+                        messagePreviewLines = previewLines,
+                        initialPrompt = chatPulseSeed,
+                        onClose = {
+                            chatPulseOpen = false
+                            chatPulseSeed = null
+                        },
+                    )
+                }
             }
         }
     }

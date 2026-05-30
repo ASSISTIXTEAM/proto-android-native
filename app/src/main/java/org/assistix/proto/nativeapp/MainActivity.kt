@@ -86,6 +86,7 @@ class MainActivity : ComponentActivity() {
         val app = application as? ProtoApplication ?: return
         lifecycleScope.launch {
             app.chatLocalPrefs.lockVault()
+            runCatching { app.draftPrefs.persistBackup() }
         }
     }
 

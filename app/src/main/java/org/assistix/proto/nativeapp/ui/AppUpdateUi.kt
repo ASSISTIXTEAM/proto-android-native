@@ -72,6 +72,7 @@ fun MandatoryUpdateScreen(
     val scope = rememberCoroutineScope()
     var downloadStarted by remember(info.versionCode) { mutableIntStateOf(0) }
     var helpExpanded by remember { mutableStateOf(false) }
+    var installFailed by remember { mutableStateOf(false) }
 
     LaunchedEffect(info.versionCode) {
         if (downloadStarted != 0) return@LaunchedEffect
@@ -172,6 +173,10 @@ fun MandatoryUpdateScreen(
                 Spacer(Modifier.height(6.dp))
                 Text(it, style = MaterialTheme.typography.labelMedium, color = ProtoOrange, textAlign = TextAlign.Center)
             }
+            if (failed || installFailed) {
+                Spacer(Modifier.height(14.dp))
+                UpdateVpnConnectivityHint()
+            }
             if (info.apkSizeBytes > 0 && !ready) {
                 Spacer(Modifier.height(4.dp))
                 Text(
@@ -190,7 +195,7 @@ fun MandatoryUpdateScreen(
                                 updateManager.openInstallPermissionSettings()
                                 Toast.makeText(ctx, UiStrings.updateAllowInstall, Toast.LENGTH_LONG).show()
                             } else {
-                                updateManager.installPendingApk()
+                                installFailed = !updateManager.installPendingApk()
                             }
                         },
                         Modifier.fillMaxWidth(),
@@ -234,7 +239,7 @@ fun MandatoryUpdateScreen(
                 exit = fadeOut() + shrinkVertically(),
             ) {
                 UpdateHelpPanel(
-                    showErrorHint = failed,
+                    showErrorHint = failed || installFailed,
                     onOpenSite = { openUrlInBrowser(ctx, apkUrl) },
                     onOpenHelpWeb = { openUrlInBrowser(ctx, helpWebUrl) },
                     onOpenEmail = { openUrlInBrowser(ctx, "mailto:$supportEmail") },
@@ -336,6 +341,8 @@ fun AppUpdatePromptDialog(
                                         Toast.makeText(ctx, UiStrings.updateAllowInstall, Toast.LENGTH_LONG).show()
                                     } else if (updateManager.installPendingApk()) {
                                         onDismiss()
+                                    } else if (updateManager.canInstallPackages()) {
+                                        Toast.makeText(ctx, UiStrings.updateInstallVpnHintBody, Toast.LENGTH_LONG).show()
                                     }
                                 }
                                 is AppUpdatePhase.Downloading -> Unit
@@ -468,6 +475,34 @@ private fun UpdateBrandIcon(
 }
 
 @Composable
+fun UpdateVpnConnectivityHint(modifier: Modifier = Modifier) {
+    Column(
+        modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color(0xFF1A1410))
+            .padding(14.dp),
+    ) {
+        Text(
+            UiStrings.updateInstallVpnHintTitle,
+            color = ProtoOrange,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            UiStrings.updateInstallVpnHintBody,
+            color = Color(0xFFCBD5E1),
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Center,
+            lineHeight = 18.sp,
+        )
+    }
+}
+
+@Composable
 private fun UpdateHelpPanel(
     showErrorHint: Boolean,
     onOpenSite: () -> Unit,
@@ -484,6 +519,8 @@ private fun UpdateHelpPanel(
     ) {
         if (showErrorHint) {
             Text(UiStrings.updateMandatoryHelpErrorHint, color = ProtoOrange, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(10.dp))
+            UpdateVpnConnectivityHint()
             Spacer(Modifier.height(10.dp))
         }
         ProtoGhostButton(UiStrings.updateMandatoryHelpDownloadBtn, onOpenSite, Modifier.fillMaxWidth())

@@ -60,6 +60,12 @@ class ProtoNetworkMonitor(context: Context) {
             caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
     }
 
+    fun isVpnActive(): Boolean {
+        val net = cm.activeNetwork ?: return false
+        val caps = cm.getNetworkCapabilities(net) ?: return false
+        return caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+    }
+
     /** Keeps [isOnline] in sync with [onlineFlow] (ConnectivityManager callbacks). */
     fun attach(scope: CoroutineScope) {
         scope.launch {

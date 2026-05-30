@@ -113,17 +113,30 @@ fun AssistixRateMeter(limit: AssistixRateLimit) {
     val fraction =
         if (limit.limit <= 0) {
             0f
+        } else if (limit.isTokenBudget) {
+            (1f - limit.used.toFloat() / limit.limit.toFloat()).coerceIn(0f, 1f)
         } else {
             (limit.remaining.toFloat() / limit.limit.toFloat()).coerceIn(0f, 1f)
         }
     val animated by animateFloatAsState(fraction, animationSpec = ProtoMotion.gentleSpring(false), label = "aiRate")
     Column(Modifier.fillMaxWidth()) {
         Text(
-            UiStrings.assistixRateRemainingFmt(limit.remaining, limit.limit),
+            if (limit.isTokenBudget) {
+                UiStrings.assistixTokensUsedFmt(limit.used, limit.limit)
+            } else {
+                UiStrings.assistixRateRemainingFmt(limit.remaining, limit.limit)
+            },
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.SemiBold,
             color = if (exhausted) Color(0xFFFFCDD2) else Color.White,
         )
+        if (limit.isTokenBudget && limit.resetInSec > 0) {
+            Text(
+                UiStrings.assistixTokensResetFmt(limit.resetInSec / 3600, (limit.resetInSec % 3600) / 60),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(0.75f),
+            )
+        }
         Spacer(Modifier.height(8.dp))
         LinearProgressIndicator(
             progress = { animated },
@@ -388,14 +401,5 @@ fun AssistixComposerGlass(
 
 @Composable
 private fun AssistixRateMeterCompact(limit: AssistixRateLimit) {
-    Text(
-        UiStrings.assistixRateRemainingFmt(limit.remaining, limit.limit),
-        style = MaterialTheme.typography.labelMedium,
-        color =
-            if (limit.isExhausted()) {
-                MaterialTheme.colorScheme.error
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
-    )
+    AssistixTokenMeterCompact(limit)
 }

@@ -16,9 +16,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -36,7 +33,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 
-enum class MainTab { Settings, Chats, Pulse, Assistix, Profile }
+enum class MainTab { Settings, Chats, Assistix, Profile }
 
 @Composable
 fun ProtoBottomBar(
@@ -72,10 +69,6 @@ fun ProtoBottomBar(
                     if (tab != selected) haptic(HapticKind.Toggle)
                     onSelect(tab)
                 }
-                PulseNavItem(MainTab.Pulse, selected) { tab ->
-                    if (tab != selected) haptic(HapticKind.Toggle)
-                    onSelect(tab)
-                }
                 NavItem(MainTab.Assistix, selected, UiStrings.assistixAi, "PROTO/assistix.png", "PROTO/assistix-light.png") { tab ->
                     if (tab != selected) haptic(HapticKind.Toggle)
                     onSelect(tab)
@@ -86,45 +79,6 @@ fun ProtoBottomBar(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun PulseNavItem(
-    tab: MainTab,
-    selected: MainTab,
-    onSelect: (MainTab) -> Unit,
-) {
-    val on = tab == selected
-    val pillColor by animateColorAsState(
-        if (on) MaterialTheme.colorScheme.primary else Color.Transparent,
-        animationSpec =
-            spring(
-                dampingRatio = Spring.DampingRatioNoBouncy,
-                stiffness = Spring.StiffnessLow,
-            ),
-        label = "pulsePill",
-    )
-    val padH by animateDpAsState(if (on) 20.dp else 12.dp, label = "pulsePad")
-    Box(
-        modifier =
-            Modifier
-                .clip(RoundedCornerShape(28.dp))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = ripple(bounded = true, color = MaterialTheme.colorScheme.primary.copy(0.35f)),
-                    onClick = { onSelect(tab) },
-                )
-                .background(pillColor)
-                .padding(horizontal = padH, vertical = 10.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            Icons.Default.Bolt,
-            contentDescription = UiStrings.pulseTitle,
-            modifier = Modifier.size(28.dp),
-            tint = if (on) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-        )
     }
 }
 

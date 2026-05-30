@@ -61,6 +61,9 @@ class ProtoApplication : Application() {
     lateinit var prefs: ProtoAppPreferences
     lateinit var chatLocalPrefs: ProtoChatLocalPrefs
     lateinit var draftPrefs: ProtoDraftPrefs
+    lateinit var offlineVault: org.assistix.proto.nativeapp.data.ProtoOfflineVault
+    lateinit var profileCache: org.assistix.proto.nativeapp.data.ProtoProfileCache
+    lateinit var connectivity: org.assistix.proto.nativeapp.data.ProtoConnectivityAdvisor
     lateinit var stt: ProtoSttCoordinator
     lateinit var sttQueue: ProtoSttQueue
     lateinit var appUpdate: ProtoAppUpdateManager
@@ -79,10 +82,22 @@ class ProtoApplication : Application() {
             prefs = ProtoAppPreferences(this)
             chatLocalPrefs = ProtoChatLocalPrefs(this)
             draftPrefs = ProtoDraftPrefs(this)
+            offlineVault = org.assistix.proto.nativeapp.data.ProtoOfflineVault(this)
+            profileCache = org.assistix.proto.nativeapp.data.ProtoProfileCache(offlineVault, api)
             themeStore = ProtoThemeStore(this)
             notifier = ProtoNotifier(this)
             network = ProtoNetworkMonitor(this)
             network.attach(applicationScope)
+            connectivity = org.assistix.proto.nativeapp.data.ProtoConnectivityAdvisor(this, network, api)
+            applicationScope.launch {
+                runCatching { draftPrefs.ensureRecovered() }
+                runCatching { connectivity.refresh() }
+            }
+            applicationScope.launch {
+                network.onlineFlow.collect { online ->
+                    if (online) runCatching { connectivity.refresh() }
+                }
+            }
             cache = ProtoCacheManager(this)
             stt = ProtoSttCoordinator(this, api, network, prefs, notifier)
             sttQueue = ProtoSttQueue(this, applicationScope, stt, api, cache, prefs)

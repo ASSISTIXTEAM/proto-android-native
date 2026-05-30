@@ -32,6 +32,11 @@ object UiStrings {
     val someoneRecording get() = bundle.someoneRecording
     val revokeOtherDevices get() = bundle.revokeOtherDevices
     val filterArchive get() = bundle.filterArchive
+    val archiveFolderTitle get() = bundle.archiveFolderTitle
+    val archivePullHint get() = bundle.archivePullHint
+    val archivePullRelease get() = bundle.archivePullRelease
+    val backFromArchive get() = bundle.backFromArchive
+    fun archiveFolderCountFmt(count: Int): String = String.format(bundle.archiveFolderCountFmt, count)
     val filterMuted get() = bundle.filterMuted
     val filterDrafts get() = bundle.filterDrafts
     val filterStarred get() = bundle.filterStarred
@@ -873,6 +878,12 @@ object UiStrings {
     fun assistixRateRemainingFmt(remaining: Int, limit: Int): String =
         String.format(bundle.assistixRateRemainingFmt, remaining, limit)
 
+    fun assistixTokensUsedFmt(used: Int, limit: Int): String =
+        String.format(bundle.assistixTokensUsedFmt, used, limit)
+
+    fun assistixTokensResetFmt(hours: Int, minutes: Int): String =
+        String.format(bundle.assistixTokensResetFmt, hours, minutes)
+
     fun folderDeleteConfirmFmt(name: String): String = String.format(bundle.folderDeleteConfirmFmt, name)
 
     val fabMenuTitle get() = bundle.fabMenuTitle
@@ -986,10 +997,16 @@ object UiStrings {
     val pulseSavedSection get() = bundle.pulseSavedSection
     val pulseAllClear get() = bundle.pulseAllClear
     val protoLinkDiscuss get() = bundle.protoLinkDiscuss
-    val chatCopilot get() = bundle.chatCopilot
-    val chatCopilotHint get() = bundle.chatCopilotHint
+    val chatPulse get() = bundle.chatPulse
+    val chatPulseHint get() = bundle.chatPulseHint
+    val chatPulseEmpty get() = bundle.chatPulseEmpty
+    val chatPulseInputHint get() = bundle.chatPulseInputHint
     val languageBuddyOriginal get() = bundle.languageBuddyOriginal
     val deviceGeoFmt get() = bundle.deviceGeoFmt
+    val connectivityWarningTitle get() = bundle.connectivityWarningTitle
+    val connectivityWarningBody get() = bundle.connectivityWarningBody
+    val updateInstallVpnHintTitle get() = bundle.updateInstallVpnHintTitle
+    val updateInstallVpnHintBody get() = bundle.updateInstallVpnHintBody
     val loginAlertTitle get() = bundle.loginAlertTitle
     val shareIntoProto get() = bundle.shareIntoProto
     val widgetQuickChatLabel get() = bundle.widgetQuickChatLabel

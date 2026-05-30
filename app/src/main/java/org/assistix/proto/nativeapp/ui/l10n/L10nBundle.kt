@@ -23,6 +23,11 @@ class L10nBundle {
     var someoneRecording: String = ""
     var revokeOtherDevices: String = ""
     var filterArchive: String = ""
+    var archiveFolderTitle: String = "Archive"
+    var archiveFolderCountFmt: String = "%1\$d chats"
+    var archivePullHint: String = "Pull down to open"
+    var archivePullRelease: String = "Release to open archive"
+    var backFromArchive: String = "All chats"
     var filterMuted: String = ""
     var filterDrafts: String = ""
     var filterStarred: String = ""
@@ -843,10 +848,20 @@ class L10nBundle {
     var pulseSavedSection: String = "Saved reminders"
     var pulseAllClear: String = "All caught up for today"
     var protoLinkDiscuss: String = "Discuss with Assistix"
-    var chatCopilot: String = "Copilot"
-    var chatCopilotHint: String = "Ask about this chat — summaries, tasks, tone."
+    var chatPulse: String = "Pulse"
+    var chatPulseHint: String = "Chat with PROTO AI about this conversation."
+    var chatPulseEmpty: String = "Ask anything about this chat — decisions, drafts, summaries."
+    var chatPulseInputHint: String = "Message Pulse…"
+    var assistixTokensUsedFmt: String = "%1\$d / %2\$d tokens · 5 h"
+    var assistixTokensResetFmt: String = "Resets in %1\$d h %2\$d min"
     var languageBuddyOriginal: String = "Original"
     var deviceGeoFmt: String = "%1\$s · %2\$s"
+    var connectivityWarningTitle: String = "VPN or foreign network"
+    var connectivityWarningBody: String =
+        "PROTO may work poorly with VPN or a non-Russian IP due to Russian internet restrictions (RKN). Try disabling VPN or using a Russian VPN server abroad. Informational only."
+    var updateInstallVpnHintTitle: String = "Install didn't start?"
+    var updateInstallVpnHintBody: String =
+        "If update install fails, disable VPN or use a Russian VPN server — foreign routes often break APK install and downloads (RKN restrictions)."
     var loginAlertTitle: String = "New sign-in"
     var shareIntoProto: String = "Share to PROTO"
     var widgetQuickChatLabel: String = "PROTO · Quick chat"
@@ -921,6 +936,11 @@ class L10nBundle {
         someoneRecording = source.someoneRecording
         revokeOtherDevices = source.revokeOtherDevices
         filterArchive = source.filterArchive
+        archiveFolderTitle = source.archiveFolderTitle
+        archiveFolderCountFmt = source.archiveFolderCountFmt
+        archivePullHint = source.archivePullHint
+        archivePullRelease = source.archivePullRelease
+        backFromArchive = source.backFromArchive
         filterMuted = source.filterMuted
         filterDrafts = source.filterDrafts
         filterStarred = source.filterStarred
@@ -1741,10 +1761,18 @@ class L10nBundle {
         pulseSavedSection = source.pulseSavedSection
         pulseAllClear = source.pulseAllClear
         protoLinkDiscuss = source.protoLinkDiscuss
-        chatCopilot = source.chatCopilot
-        chatCopilotHint = source.chatCopilotHint
+        chatPulse = source.chatPulse
+        chatPulseHint = source.chatPulseHint
+        chatPulseEmpty = source.chatPulseEmpty
+        chatPulseInputHint = source.chatPulseInputHint
+        assistixTokensUsedFmt = source.assistixTokensUsedFmt
+        assistixTokensResetFmt = source.assistixTokensResetFmt
         languageBuddyOriginal = source.languageBuddyOriginal
         deviceGeoFmt = source.deviceGeoFmt
+        connectivityWarningTitle = source.connectivityWarningTitle
+        connectivityWarningBody = source.connectivityWarningBody
+        updateInstallVpnHintTitle = source.updateInstallVpnHintTitle
+        updateInstallVpnHintBody = source.updateInstallVpnHintBody
         loginAlertTitle = source.loginAlertTitle
         shareIntoProto = source.shareIntoProto
         widgetQuickChatLabel = source.widgetQuickChatLabel

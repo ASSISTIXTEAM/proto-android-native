@@ -330,6 +330,7 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
                 null
             } ?: return emptyMap()
         if (!j.optBoolean("ok", false)) return emptyMap()
+        parseAssistixRateLimit(j)?.let { AssistixUsageHub.apply(it) }
         val out = mutableMapOf<Long, String>()
         val tr = j.optJSONArray("translations") ?: return emptyMap()
         for (i in 0 until tr.length()) {
@@ -579,6 +580,24 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
         return MeLoad(parseMeProfile(u), j.optRestriction("account_restriction"))
     }
 
+    /** Public geo hint (Cloudflare country header on proto.su). Empty = unknown. */
+    fun fetchGeoCountry(): String? =
+        try {
+            val req =
+                Request.Builder()
+                    .url(url("/api/geo.php"))
+                    .get()
+                    .build()
+            client.newCall(req).execute().use { res ->
+                if (!res.isSuccessful) return null
+                val j = parse(res.body?.string() ?: "")
+                if (!j.optBoolean("ok", false)) return null
+                j.optString("country", "").trim().uppercase().ifBlank { null }
+            }
+        } catch (_: Exception) {
+            null
+        }
+
     fun ensureSavedConversation(token: String): Int? {
         val j =
             authedPost(
@@ -594,6 +613,7 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
         if (token.isNullOrBlank()) return null
         val encoded = java.net.URLEncoder.encode(url, Charsets.UTF_8.name())
         val j = authedGet(token, "/api/link_preview.php?url=$encoded") ?: return null
+        parseAssistixRateLimit(j)?.let { AssistixUsageHub.apply(it) }
         val p = j.optJSONObject("preview") ?: return null
         return LinkPreview(
             url = j.optString("url", url),
@@ -1153,7 +1173,7 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
             configured = j.optBoolean("configured", false),
             defaultModel = j.optString("default_model", "tide"),
             models = models.filter { it.key.isNotBlank() },
-            rateLimit = parseAssistixRateLimit(j),
+            rateLimit = parseAssistixRateLimit(j).also { AssistixUsageHub.apply(it) },
         )
     }
 
@@ -1303,7 +1323,7 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
                     }
                 }
 
-                streamError?.let { return it }
+                streamError?.let { return stampAssistix(it) }
 
                 val resolved =
                     when {
@@ -1312,20 +1332,28 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
                         else -> ""
                     }
                 if (resolved.isBlank()) {
-                    AssistixReply(ok = false, text = "", error = "empty_response", message = "", rateLimit = streamRate)
-                } else {
+                    return stampAssistix(
+                        AssistixReply(ok = false, text = "", error = "empty_response", message = "", rateLimit = streamRate),
+                    )
+                }
+                return stampAssistix(
                     AssistixReply(
                         ok = true,
                         text = AssistixText.forChat(resolved),
                         model = Assistix.MODEL,
                         rateLimit = streamRate,
-                    )
-                }
+                    ),
+                )
             }
         } catch (_: Exception) {
             lastHttpOk = false
             AssistixReply(ok = false, text = "", error = "network", message = "")
         }
+    }
+
+    private fun stampAssistix(reply: AssistixReply): AssistixReply {
+        AssistixUsageHub.applyFromReply(reply)
+        return reply
     }
 
     fun assistixRequest(
@@ -1387,18 +1415,30 @@ class ProtoApi(private val appContext: android.content.Context? = null) {
                         "fix_text", "rewrite_style", "expand_draft" -> AssistixText.forComposer(out, text)
                         else -> out
                     }
-                return AssistixReply(
-                    ok = true,
-                    text = cleaned,
-                    model = Assistix.MODEL,
-                    rateLimit = parseAssistixRateLimit(j),
-                    replies = replyLines.ifEmpty { parseAssistixReplyLines(cleaned) },
+                return stampAssistix(
+                    AssistixReply(
+                        ok = true,
+                        text = cleaned,
+                        model = Assistix.MODEL,
+                        rateLimit = parseAssistixRateLimit(j),
+                        totalTokens = j.optInt("total_tokens", 0),
+                        replies = replyLines.ifEmpty { parseAssistixReplyLines(cleaned) },
+                    ),
                 )
             }
         }
         val err = j.optString("error", "").ifBlank { "error" }
         val msg = j.optString("message", "").ifBlank { j.optString("error", "") }
-        return AssistixReply(ok = false, text = "", error = err, message = msg, rateLimit = parseAssistixRateLimit(j))
+        return stampAssistix(
+            AssistixReply(
+                ok = false,
+                text = "",
+                error = err,
+                message = msg,
+                rateLimit = parseAssistixRateLimit(j),
+                totalTokens = j.optInt("total_tokens", 0),
+            ),
+        )
     }
 
     private fun parseAssistixReplyLines(text: String): List<String> =
@@ -2298,6 +2338,7 @@ data class AssistixReply(
     val message: String? = null,
     val model: String? = null,
     val rateLimit: AssistixRateLimit? = null,
+    val totalTokens: Int = 0,
     val replies: List<String> = emptyList(),
 )
 

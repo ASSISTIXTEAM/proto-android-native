@@ -63,6 +63,7 @@ import kotlinx.coroutines.withContext
 import org.assistix.proto.nativeapp.data.AssistixChatRepository
 import org.assistix.proto.nativeapp.data.AssistixChatTurn
 import org.assistix.proto.nativeapp.data.AssistixRateLimit
+import org.assistix.proto.nativeapp.data.AssistixUsageHub
 import org.assistix.proto.nativeapp.data.AssistixText
 import org.assistix.proto.nativeapp.data.AssistixThread
 import org.assistix.proto.nativeapp.data.ProtoApi
@@ -139,6 +140,8 @@ private fun AssistixThreadListScreen(
     var renameTarget by remember { mutableStateOf<AssistixThread?>(null) }
     var renameDraft by remember { mutableStateOf("") }
     var rateLimit by remember { mutableStateOf<AssistixRateLimit?>(null) }
+    val hubBudget by AssistixUsageHub.budget.collectAsState()
+    val effectiveRate = hubBudget ?: rateLimit
 
     LaunchedEffect(token) {
         checking = true
@@ -178,7 +181,7 @@ private fun AssistixThreadListScreen(
             else -> {
                 Column(Modifier.fillMaxSize()) {
                     AssistixHeroBanner(
-                        rateLimit = rateLimit,
+                        rateLimit = effectiveRate,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                     )
                     if (selectionMode) {
@@ -360,6 +363,8 @@ private fun AssistixChatScreen(
     var streamIndex by remember { mutableIntStateOf(-1) }
     var confirmClear by remember { mutableStateOf(false) }
     var rateLimit by remember { mutableStateOf<AssistixRateLimit?>(null) }
+    val hubBudget by AssistixUsageHub.budget.collectAsState()
+    val effectiveRate = hubBudget ?: rateLimit
     var recording by remember { mutableStateOf(false) }
     var voiceFile by remember { mutableStateOf<java.io.File?>(null) }
     var recorder by remember { mutableStateOf<MediaRecorder?>(null) }
@@ -474,7 +479,7 @@ private fun AssistixChatScreen(
         }
 
         AssistixComposerGlass(
-            rateLimit = rateLimit,
+            rateLimit = effectiveRate,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
         ) {
             Row(verticalAlignment = Alignment.Bottom) {
@@ -542,13 +547,13 @@ private fun AssistixChatScreen(
                 minLines = 1,
                 maxLines = 5,
                 shape = ProtoShapes.field,
-                enabled = !busy && !token.isNullOrBlank() && rateLimit?.isExhausted() != true,
+                enabled = !busy && !token.isNullOrBlank() && effectiveRate?.isExhausted() != true,
             )
             IconButton(
                 onClick = {
                     val t = token ?: return@IconButton
                     val q = input.trim()
-                    if (q.isEmpty() || busy || rateLimit?.isExhausted() == true) return@IconButton
+                    if (q.isEmpty() || busy || effectiveRate?.isExhausted() == true) return@IconButton
                     scope.launch {
                         busy = true
                         assistixChat.appendUser(threadId, q)
@@ -602,13 +607,13 @@ private fun AssistixChatScreen(
                         streamIndex = -1
                     }
                 },
-                enabled = !busy && input.isNotBlank() && !token.isNullOrBlank() && rateLimit?.isExhausted() != true,
+                enabled = !busy && input.isNotBlank() && !token.isNullOrBlank() && effectiveRate?.isExhausted() != true,
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.Send,
                     contentDescription = UiStrings.send,
                     tint =
-                        if (input.isNotBlank() && !busy && rateLimit?.isExhausted() != true) {
+                        if (input.isNotBlank() && !busy && effectiveRate?.isExhausted() != true) {
                             ProtoOrange
                         } else {
                             MaterialTheme.colorScheme.outline

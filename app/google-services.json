@@ -1,8 +1,8 @@
 {
   "project_info": {
     "project_number": "000000000000",
-    "project_id": "your-firebase-project",
-    "storage_bucket": "your-firebase-project.appspot.com"
+    "project_id": "proto-assistix-placeholder",
+    "storage_bucket": "proto-assistix-placeholder.appspot.com"
   },
   "client": [
     {
